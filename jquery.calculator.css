@@ -1,0 +1,100 @@
+/* Main style sheet for jQuery Calculator */
+button.calculator-trigger {
+	width: 25px;
+}
+img.calculator-trigger {
+	margin: 2px;
+	vertical-align: middle;
+}
+#calculator-div {
+	display: none;
+	z-index: 10;
+	margin: 0;
+	padding: 0;
+	border: 1px solid #888;
+	color: #000;
+	background-color: #f4f4f4;
+	font-family: Arial,Helvetica,sans-serif;
+}
+.calculator-rtl {
+	direction: rtl;
+}
+.calculator-prompt {
+	clear: both;
+	width: 100%;
+	text-align: center;
+}
+.calculator-result {
+	clear: both;
+	margin: 2px;
+	padding: 0px 2px;
+	text-align: right;
+	background-color: #fff;
+	border: 1px inset #000;
+	font-size: 110%;
+}
+.calculator-row {
+	clear: both;
+	float: left;
+	width: 100%;
+}
+.calculator-space {
+	float: left;
+	margin: 2px;
+	width: 28px;
+}
+.calculator-half-space {
+	float: left;
+	margin: 1px;
+	width: 14px;
+}
+.calculator-row button {
+	float: left;
+	margin: 2px;
+	padding: 0px;
+	height: 22px;
+	background-color: #f4f4f4;
+	text-align: center;
+	cursor: pointer;
+}
+.calculator-row .calculator-ctrl {
+	width: 60px;
+	background-color: #e8e8e8;
+}
+.calculator-row .calculator-undo, .calculator-row .calculator-clear-error, .calculator-row .calculator-clear {
+	width: 28px;
+}
+.calculator-row .calculator-base, .calculator-row .calculator-angle {
+	width: 28px;
+	font-size: 70%;
+}
+.calculator-row .calculator-base-active, .calculator-row .calculator-angle-active {
+	border: 2px inset #fff;
+}
+.calculator-digit, .calculator-oper {
+	width: 28px;
+}
+.calculator-mem-empty {
+	color: #888;
+}
+.calculator-trig {
+	font-size: 70%;
+}
+@-moz-document url-prefix() { // Firefox
+	.calculator-trig, .calculator-base {
+		text-indent: -3px;
+	}
+}
+.calculator-key-down {
+}
+.calculator-cover {
+	display: none;
+	display/**/: block;
+	position: absolute;
+	z-index: -1;
+	filter: mask();
+	top: -4px;
+	left: -4px;
+	width: 125px;
+	height: 200px;
+}
