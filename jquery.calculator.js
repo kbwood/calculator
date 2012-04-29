@@ -1,5 +1,5 @@
 ﻿/* http://keith-wood.name/calculator.html
-   Calculator field entry extension for jQuery v1.2.0.
+   Calculator field entry extension for jQuery v1.2.1.
    Written by Keith Wood (kbwood{at}iinet.com.au) October 2008.
    Dual licensed under the GPL (http://dev.jquery.com/browser/trunk/jquery/GPL-LICENSE.txt) and 
    MIT (http://dev.jquery.com/browser/trunk/jquery/MIT-LICENSE.txt) licenses. 
@@ -234,9 +234,9 @@ $.extend(Calculator.prototype, {
 	_attachCalculator: function(target, settings) {
 		var $target = $(target);
 		var inline = target.nodeName.toLowerCase() != 'input';
-		var keyEntry = (!inline ? null :
+		var keyEntry = (!inline ? $target :
 			$('<input type="text" class="' + this._inlineEntryClass + '"/>'));
-		var inst = {_input: (inline ? keyEntry : $target), _inline: inline,
+		var inst = {_input: keyEntry, _inline: inline,
 			_mainDiv: (inline ? $('<div class="' + this._inlineClass + '"></div>') :
 			this.mainDiv)};
 		inst.settings = $.extend({}, settings || {}); 
@@ -385,10 +385,9 @@ $.extend(Calculator.prototype, {
 					return false;
 				}
 			});
-			var extras = this._getExtras(inline);
 			control.find('.' + this._inlineEntryClass + ',button').attr('disabled', 'disabled').end().
 				prepend('<div class="' + this._disableClass + '" style="width: ' +
-				(inline.width() + extras[0]) + 'px; height: ' + (inline.height() + extras[1]) +
+				inline.outerWidth() + 'px; height: ' + inline.outerHeight() +
 				'px; left: ' + (offset.left - relOffset.left) +
 				'px; top: ' + (offset.top - relOffset.top) + 'px;"></div>');
 		}
@@ -463,13 +462,10 @@ $.extend(Calculator.prototype, {
 		var duration = $.calculator._get(inst, 'duration');
 		var postProcess = function() {
 			$.calculator._showingCalculator = true;
-			if (!inst._inline && $.browser.msie && parseInt($.browser.version, 10) < 7) {
-				// fix IE < 7 select problems
-				var extras = $.calculator._getExtras(inst._mainDiv);
-				$('iframe.' + $.calculator._coverClass).css({
-					width: inst._mainDiv.width() + extras[0],
-					height: inst._mainDiv.height() + extras[1]});
-			}
+			var borders = $.calculator._getBorders(inst._mainDiv);
+			inst._mainDiv.find('iframe.' + $.calculator._coverClass). // IE6- only
+				css({left: -borders[0], top: -borders[1],
+					width: inst._mainDiv.outerWidth(), height: inst._mainDiv.outerHeight()});
 		};
 		if ($.effects && $.effects[showAnim]) {
 			inst._mainDiv.show(showAnim, $.calculator._get(inst, 'showOptions'),
@@ -507,12 +503,11 @@ $.extend(Calculator.prototype, {
 	/* Generate the calculator content.
 	   @param  inst  (object) the instance settings */
 	_updateCalculator: function(inst) {
-		var extras = this._getExtras(inst._mainDiv);
-		var dims = {width: inst._mainDiv.width() + extras[0],
-			height: inst._mainDiv.height() + extras[1]};
+		var borders = this._getBorders(inst._mainDiv);
 		inst._mainDiv.html(this._generateHTML(inst)).
-			find('iframe.' + this._coverClass).
-			css({width: dims.width, height: dims.height});
+			find('iframe.' + this._coverClass). // IE6- only
+			css({left: -borders[0], top: -borders[1],
+				width: inst._mainDiv.outerWidth(), height: inst._mainDiv.outerHeight()});
 		inst._mainDiv.removeClass().addClass(this._get(inst, 'calculatorClass') + ' ' +
 			(this._get(inst, 'isRTL') ? 'calculator-rtl ' : '') +
 			(inst._inline ? this._inlineClass : ''));
@@ -521,19 +516,16 @@ $.extend(Calculator.prototype, {
 		}
 	},
 
-	/* Retrieve the size of borders and padding for an element.
+	/* Retrieve the size of left and top borders for an element.
 	   @param  elem  (jQuery object) the element of interest
-	   @return  (number[2]) the horizontal and vertical sizes */
-	_getExtras: function(elem) {
+	   @return  (number[2]) the left and top borders */
+	_getBorders: function(elem) {
 		var convert = function(value) {
-			return {thin: 1, medium: 3, thick: 5}[value] || value;
+			var extra = ($.browser.msie ? 1 : 0);
+			return {thin: 1 + extra, medium: 3 + extra, thick: 5 + extra}[value] || value;
 		};
-		return [parseInt(convert(elem.css('border-left-width')), 10) +
-			parseInt(convert(elem.css('border-right-width')), 10) +
-			parseInt(elem.css('padding-left'), 10) + parseInt(elem.css('padding-right'), 10),
-			parseInt(convert(elem.css('border-top-width')), 10) +
-			parseInt(convert(elem.css('border-bottom-width')), 10) +
-			parseInt(elem.css('padding-top'), 10) + parseInt(elem.css('padding-bottom'), 10)];
+		return [parseFloat(convert(elem.css('border-left-width'))),
+			parseFloat(convert(elem.css('border-top-width')))];
 	},
 
 	/* Check positioning to remain on screen.
@@ -557,19 +549,20 @@ $.extend(Calculator.prototype, {
 			inst._mainDiv.css('width', width);
 		}
 		// reposition calculator panel horizontally if outside the browser window
-		if (this._get(inst, 'isRTL') || (offset.left + inst._mainDiv.width() - scrollX) > browserWidth) {
+		if (this._get(inst, 'isRTL') ||
+				(offset.left + inst._mainDiv.outerWidth() - scrollX) > browserWidth) {
 			offset.left = Math.max((isFixed ? 0 : scrollX),
-				pos[0] + (inst._input ? inst._input.width() : 0) -
-				(isFixed ? scrollX : 0) - inst._mainDiv.width() -
+				pos[0] + (inst._input ? inst._input.outerWidth() : 0) -
+				(isFixed ? scrollX : 0) - inst._mainDiv.outerWidth() -
 				(isFixed && $.browser.opera ? document.documentElement.scrollLeft : 0));
 		}
 		else {
 			offset.left -= (isFixed ? scrollX : 0);
 		}
 		// reposition calculator panel vertically if outside the browser window
-		if ((offset.top + inst._mainDiv.height() - scrollY) > browserHeight) {
+		if ((offset.top + inst._mainDiv.outerHeight() - scrollY) > browserHeight) {
 			offset.top = Math.max((isFixed ? 0 : scrollY),
-				pos[1] - (isFixed ? scrollY : 0) - inst._mainDiv.height() -
+				pos[1] - (isFixed ? scrollY : 0) - inst._mainDiv.outerHeight() -
 				(isFixed && $.browser.opera ? document.documentElement.scrollTop : 0));
 		}
 		else {
@@ -795,7 +788,7 @@ $.extend(Calculator.prototype, {
 			html += '</div>';
 		}
 		html += '<div style="clear: both;"></div>' + 
-			(!inst._inline && $.browser.msie && parseInt($.browser.version, 10) < 7 ? 
+			(!inst._inline && $.browser.msie && parseInt($.browser.version, 10) < 7 ? // IE6- only
 			'<iframe src="javascript:false;" class="' + this._coverClass + '"></iframe>' : '');
 		html = $(html);
 		html.find('button').mousedown(function() { $(this).addClass('calculator-key-down'); }).
@@ -866,11 +859,12 @@ $.extend(Calculator.prototype, {
 	   @param  digit  (string) the digit to append */
 	_digit: function(inst, digit) {
 		var decimalChar = this._get(inst, 'decimalChar');
+		inst.dispValue = (inst._newValue ? '' : inst.dispValue);
 		if (digit == decimalChar && inst.dispValue.indexOf(digit) > -1) {
 			return;
 		}
-		inst.dispValue = ((inst._newValue ? '' : inst.dispValue) + digit).
-			replace(/^0(\d)/, '$1').replace(new RegExp('^(-?)([\\.' + decimalChar + '])'), '$10$2');
+		inst.dispValue = (inst.dispValue + digit).replace(/^0(\d)/, '$1').
+			replace(new RegExp('^(-?)([\\.' + decimalChar + '])'), '$10$2');
 		if (decimalChar != '.') {
 			inst.dispValue = inst.dispValue.replace(new RegExp('^' + decimalChar), '0.');
 		}

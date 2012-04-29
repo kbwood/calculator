@@ -1,4 +1,7 @@
-/* Main style sheet for jQuery Calculator v1.2.0 */
+/* Main style sheet for jQuery Calculator v1.2.1 */
+div.hasCalculator, span.hasCalculator {
+	position: relative;
+}
 button.calculator-trigger {
 	width: 25px;
 	padding: 0px;
@@ -18,12 +21,13 @@ img.calculator-trigger {
 	font-family: Arial,Helvetica,sans-serif;
 }
 .calculator-keyentry {
+	position: absolute;
+	top: 3px;
+	right: 3px;
 	width: 0px;
-	z-index: -10;
 }
 .calculator-inline {
 	position: relative;
-	top: -1.5em;
 	border: 1px solid #888;
 	background-color: #f4f4f4;
 }
@@ -59,7 +63,6 @@ img.calculator-trigger {
 }
 .calculator-row {
 	clear: both;
-	float: left;
 	width: 100%;
 }
 .calculator-space {
