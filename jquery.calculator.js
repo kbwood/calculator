@@ -1,5 +1,5 @@
 ﻿/* http://keith-wood.name/calculator.html
-   Calculator field entry extension for jQuery v1.3.1.
+   Calculator field entry extension for jQuery v1.3.2.
    Written by Keith Wood (kbwood{at}iinet.com.au) October 2008.
    Dual licensed under the GPL (http://dev.jquery.com/browser/trunk/jquery/GPL-LICENSE.txt) and 
    MIT (http://dev.jquery.com/browser/trunk/jquery/MIT-LICENSE.txt) licenses. 
@@ -156,6 +156,10 @@ function Calculator() {
 		value: 0, // The initial value for inline calculators
 		base: 10, // The numeric base for calculations
 		precision: 10, // The number of digits of precision to use in rounding for display
+		memoryAsCookie: false, // True to save memory into cookie, false for memory only
+		cookieName: 'calculatorMemory', // Name of cookie for memory
+		cookieExpires: 24 * 60 * 60, // The time that the memory cookie expires as a Date or number of seconds
+		cookiePath: '', // The path for the memory cookie
 		useDegrees: false, // True to use degress for trigonometric functions, false for radians
 		constrainInput: true, // True to restrict typed characters to numerics, false to allow anything
 		onOpen: null, // Define a callback function before the panel is opened
@@ -168,7 +172,7 @@ function Calculator() {
 }
 
 $.extend(Calculator.prototype, {
-	/* Class name added to elements to indicate already configured with calculator. */
+	// Class name added to elements to indicate already configured with calculator
 	markerClassName: 'hasCalculator',
 
 	digit: 'd', // Indicator of a digit key
@@ -240,15 +244,21 @@ $.extend(Calculator.prototype, {
 		var inline = target.nodeName.toLowerCase() != 'input';
 		var keyEntry = (!inline ? $target :
 			$('<input type="text" class="' + this._inlineEntryClass + '"/>'));
-		var inst = {_input: keyEntry, _inline: inline,
+		var inst = {_input: keyEntry, _inline: inline, memory: 0,
 			_mainDiv: (inline ? $('<div class="' + this._inlineClass + '"></div>') :
 			this.mainDiv)};
-		inst.settings = $.extend({}, settings || {}); 
+		inst.settings = $.extend({}, settings || {});
+		if (this._get(inst, 'memoryAsCookie')) {
+			var memory = this._getMemoryCookie(inst);
+			if (memory && !isNaN(memory)) {
+				inst.memory = memory;
+			}
+		}
 		this._connectCalculator(target, inst);
 		if (inline) {
 			$target.append(keyEntry).append(inst._mainDiv).
 				bind('click.calculator', function() { keyEntry.focus(); });
-			this._reset(inst, '0', true);
+			this._reset(inst, '0');
 			this._setValue(inst);
 			this._updateCalculator(inst);
 		}
@@ -469,7 +479,7 @@ $.extend(Calculator.prototype, {
 			onOpen.apply((inst._input ? inst._input[0] : null),  // trigger custom callback
 				[(inst._inline ? inst.curValue : inst._input.val()), inst]);
 		}
-		$.calculator._reset(inst, inst._input.val(), true);
+		$.calculator._reset(inst, inst._input.val());
 		$.calculator._updateCalculator(inst);
 		// and adjust position before showing
 		offset = $.calculator._checkOffset(inst, offset, isFixed);
@@ -508,10 +518,9 @@ $.extend(Calculator.prototype, {
 	},
 
 	/* Reinitialise the calculator.
-	   @param  inst      (object) the instance settings
-	   @param  value     (number) the starting value
-	   @param  clearMem  (boolean) true to clear memory */
-	_reset: function(inst, value, clearMem) {
+	   @param  inst   (object) the instance settings
+	   @param  value  (number) the starting value */
+	_reset: function(inst, value) {
 		var base = this._get(inst, 'base');
 		var decimalChar = this._get(inst, 'decimalChar');
 		value = '' + (value || 0);
@@ -519,9 +528,38 @@ $.extend(Calculator.prototype, {
 		inst.curValue = (base == 10 ? parseFloat(value) : parseInt(value, base)) || 0;
 		inst.dispValue = this._setDisplay(inst);
 		inst.prevValue = inst._savedValue = 0;
-		inst.memory = (clearMem ? 0 : inst.memory);
 		inst._pendingOp = inst._savedOp = this._noOp;
 		inst._newValue = true;
+	},
+
+	/* Retrieve the memory value from a cookie, if any.
+	   @param  inst  (object) the instance settings
+	   @return  the memory cookie value or NaN/null if unavailable */
+	_getMemoryCookie: function(inst) {
+		var re = new RegExp('^.*' + this._get(inst, 'cookieName') + '=([^;]*).*$');
+        return parseFloat(document.cookie.replace(re, '$1'));
+	},
+
+	/* Save the memory value as a cookie.
+	   @param  inst  (object) the instance settings */
+	_setMemoryCookie: function(inst) {
+		if (!this._get(inst, 'memoryAsCookie')) {
+			return;
+		}
+		var expires = this._get(inst, 'cookieExpires');
+		if (typeof expires == 'number') {
+			var time = new Date();
+			time.setTime(time.getTime() + expires * 1000);
+			expires = time.toUTCString();
+		}
+		else if (expires.constructor == Date) {
+			expires = time.toUTCString();
+		}
+		else {
+			expires = '';
+		}
+		document.cookie = this._get(inst, 'cookieName') + '=' + inst.memory + '; expires=' + expires +
+			'; path=' + this._get(inst, 'cookiePath');
 	},
 
 	/* Set the initial value for display.
@@ -693,7 +731,7 @@ $.extend(Calculator.prototype, {
 			else {
 				var code = $.calculator._keyCodes[e.keyCode];
 				if (code) {
-					$('button[keystroke=' + code + ']', inst._mainDiv).not(':disabled').click();
+					$('button[keystroke="' + code + '"]', inst._mainDiv).not(':disabled').click();
 					handled = true;
 				}
 			}
@@ -742,7 +780,7 @@ $.extend(Calculator.prototype, {
 				(div && !$.calculator._isDisabledCalculator(div))) {
 			var code = $.calculator._keyChars[ch == decimalChar ? '.' : ch];
 			if (code) {
-				$('button[keystroke=' + code + ']', inst._mainDiv).not(':disabled').click();
+				$('button[keystroke="' + code + '"]', inst._mainDiv).not(':disabled').click();
 			}
 			return false;
 		}
@@ -1030,14 +1068,17 @@ $.extend(Calculator.prototype, {
 
 	_memAdd: function(inst) {
 		inst.memory += inst.curValue;
+		this._setMemoryCookie(inst);
 	},
 
 	_memSubtract: function(inst) {
 		inst.memory -= inst.curValue;
+		this._setMemoryCookie(inst);
 	},
 
 	_memStore: function(inst) {
 		inst.memory = inst.curValue;
+		this._setMemoryCookie(inst);
 	},
 
 	_memRecall: function(inst) {
@@ -1046,6 +1087,7 @@ $.extend(Calculator.prototype, {
 
 	_memClear: function(inst) {
 		inst.memory = 0;
+		this._setMemoryCookie(inst);
 	},
 
 	_sin: function(inst) {
@@ -1185,7 +1227,7 @@ $.extend(Calculator.prototype, {
 	   @param  inst   (object) the instance settings
 	   @param  label  (string) the button label */
 	_clear: function(inst, label) {
-		this._reset(inst, 0, false);
+		this._reset(inst, 0);
 		this._sendButton(inst, label);
 		this._updateCalculator(inst);
 	},
@@ -1211,7 +1253,7 @@ $.extend(Calculator.prototype, {
 	   @param  inst   (object) the instance settings
 	   @param  label  (string) the button label */
 	_erase: function(inst, label) {
-		this._reset(inst, 0, false);
+		this._reset(inst, 0);
 		this._updateCalculator(inst);
 		this._finished(inst, label, '');
 	},
@@ -1257,10 +1299,16 @@ $.fn.calculator = function(options) {
 			apply($.calculator, [this[0]].concat(otherArgs));
 	}
 	return this.each(function() {
-		typeof options == 'string' ?
+		if (typeof options == 'string') {
+			if (!$.calculator['_' + options + 'Calculator']) {
+				throw 'Unknown operation: ' + options;
+			}
 			$.calculator['_' + options + 'Calculator'].
-				apply($.calculator, [this].concat(otherArgs)) :
+				apply($.calculator, [this].concat(otherArgs));
+		}
+		else {
 			$.calculator._attachCalculator(this, options);
+		}
 	});
 };
 
