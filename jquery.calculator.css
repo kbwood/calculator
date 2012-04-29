@@ -49,6 +49,7 @@ img.calculator-trigger {
 	width: 14px;
 }
 .calculator-row button {
+	position: relative;
 	float: left;
 	margin: 2px;
 	padding: 0px;
@@ -86,6 +87,21 @@ img.calculator-trigger {
 	}
 }
 .calculator-key-down {
+}
+.calculator-keystroke {
+	display: none;
+	width: 16px;
+	height: 14px;
+	position: absolute;
+	left: -2px;
+	top: -2px;
+	color: #000;
+	background-color: #ccc;
+	font-size: 80%;
+}
+.calculator-keyname {
+	width: 22px;
+	font-size: 70%;
 }
 .calculator-cover {
 	display: none;
