@@ -1,5 +1,5 @@
 ﻿/* http://keith-wood.name/calculator.html
-   Calculator field entry extension for jQuery v1.3.0.
+   Calculator field entry extension for jQuery v1.3.1.
    Written by Keith Wood (kbwood{at}iinet.com.au) October 2008.
    Dual licensed under the GPL (http://dev.jquery.com/browser/trunk/jquery/GPL-LICENSE.txt) and 
    MIT (http://dev.jquery.com/browser/trunk/jquery/MIT-LICENSE.txt) licenses. 
@@ -486,8 +486,14 @@ $.extend(Calculator.prototype, {
 					width: inst._mainDiv.outerWidth(), height: inst._mainDiv.outerHeight()});
 		};
 		if ($.effects && $.effects[showAnim]) {
-			inst._mainDiv.show(showAnim, $.calculator._get(inst, 'showOptions'),
-				duration, postProcess);
+			var data = inst._mainDiv.data(); // Update old effects data
+				for (var key in data) {
+					if (key.match(/^ec\.storage\./)) {
+						data[key] = inst._mainDiv.css(key.replace(/ec\.storage\./, ''));
+					}
+				}
+				inst._mainDiv.data(data).show(showAnim,
+					$.calculator._get(inst, 'showOptions'), duration, postProcess);
 		}
 		else {
 			inst._mainDiv[showAnim || 'show']((showAnim ? duration : ''), postProcess);
