@@ -1,5 +1,5 @@
 ﻿/* http://keith-wood.name/calculator.html
-   Calculator field entry extension for jQuery v1.2.5.
+   Calculator field entry extension for jQuery v1.3.0.
    Written by Keith Wood (kbwood{at}iinet.com.au) October 2008.
    Dual licensed under the GPL (http://dev.jquery.com/browser/trunk/jquery/GPL-LICENSE.txt) and 
    MIT (http://dev.jquery.com/browser/trunk/jquery/MIT-LICENSE.txt) licenses. 
@@ -149,6 +149,7 @@ function Calculator() {
 		showOptions: {}, // Options for enhanced animations
 		duration: 'normal', // Duration of display/closure
 		appendText: '', // Display text following the input box, e.g. showing the format
+		useThemeRoller: false, // True to add ThemeRoller classes
 		calculatorClass: '', // Additional CSS class for the calculator for an instance
 		prompt: '', // Text across the top of the calculator
 		layout: this.standardLayout, // Layout of keys
@@ -162,7 +163,7 @@ function Calculator() {
 		onClose: null // Define a callback function when the panel is closed
 	};
 	$.extend(this._defaults, this.regional['']);
-	this.mainDiv = $('<div id="' + this._mainDivId + '" style="display: none;"></div>').
+	this.mainDiv = $('<div class="' + this._mainDivClass + '" style="display: none;"></div>').
 		click(this._focusEntry);
 }
 
@@ -176,7 +177,7 @@ $.extend(Calculator.prototype, {
 	control: 'c', // Indicator of a control key
 	space: 's', // Indicator of a space
 	
-	_mainDivId: 'calculator-div', // The ID of the main calculator division
+	_mainDivClass: 'calculator-popup', // The name of the main calculator division marker class
 	_inlineClass: 'calculator-inline', // The name of the inline marker class
 	_appendClass: 'calculator-append', // The name of the appended text marker class
 	_triggerClass: 'calculator-trigger', // The name of the trigger marker class
@@ -189,7 +190,7 @@ $.extend(Calculator.prototype, {
 
 	/* The standard calculator layout with simple operations. */
 	standardLayout: ['  BSCECA', '_1_2_3_+@X', '_4_5_6_-@U', '_7_8_9_*@E', '_0_._=_/'],
-	/* The extended calcualtor layout with common scientific operations. */
+	/* The extended calculator layout with common scientific operations. */
 	scientificLayout: ['@X@U@E  BSCECA', 'DGRD    _ MC_ _7_8_9_+', 'SNASSRLG_ MR_ _4_5_6_-',
 		'CSACSQLN_ MS_ _1_2_3_*', 'TNATXYEX_ M+_ _0_.+-_/', 'PIRN1X  _ M-_   _%_='],
 
@@ -250,6 +251,9 @@ $.extend(Calculator.prototype, {
 			this._reset(inst, '0', true);
 			this._setValue(inst);
 			this._updateCalculator(inst);
+		}
+		else if ($(target).is(':disabled')) {
+			this._disableCalculator(target);
 		}
 	},
 
@@ -529,9 +533,10 @@ $.extend(Calculator.prototype, {
 			find('iframe.' + this._coverClass). // IE6- only
 			css({left: -borders[0], top: -borders[1],
 				width: inst._mainDiv.outerWidth(), height: inst._mainDiv.outerHeight()});
-		inst._mainDiv.removeClass().addClass(this._get(inst, 'calculatorClass') + ' ' +
-			(this._get(inst, 'isRTL') ? 'calculator-rtl ' : '') +
-			(inst._inline ? this._inlineClass : ''));
+		inst._mainDiv.removeClass().addClass(this._get(inst, 'calculatorClass') +
+			(this._get(inst, 'useThemeRoller') ? ' ui-widget ui-widget-content' : '') +
+			(this._get(inst, 'isRTL') ? ' calculator-rtl ' : '') + ' ' +
+			(inst._inline ? this._inlineClass : this._mainDivClass));
 		if (this._curInst == inst) {
 			inst._input.focus();
 		}
@@ -642,11 +647,11 @@ $.extend(Calculator.prototype, {
 			return;
 		}
 		var target = $(event.target);
-		if (!target.parents().andSelf().is('#' + $.calculator._mainDivId) &&
+		if (!target.parents().andSelf().hasClass($.calculator._mainDivClass) &&
 				!target.hasClass($.calculator.markerClassName) &&
 				!target.parents().andSelf().hasClass($.calculator._triggerClass) &&
 				$.calculator._showingCalculator) {
-			$.calculator._hideCalculator(null, '');
+			$.calculator._hideCalculator();
 		}
 	},
 
@@ -665,7 +670,7 @@ $.extend(Calculator.prototype, {
 		var div = (inst && inst._inline ? $(e.target).parent()[0] : null);
 		if (e.keyCode == 9) { // tab
 			$.calculator.mainDiv.stop(true, true);
-			$.calculator._hideCalculator(null, '');
+			$.calculator._hideCalculator();
 			if (inst && inst._inline) {
 				inst._input.blur();
 			}
@@ -768,15 +773,17 @@ $.extend(Calculator.prototype, {
 	   @param  inst  (object) the instance settings
 	   @return  (string) the HTML for this calculator */
 	_generateHTML: function(inst) {
+		var useTR = this._get(inst, 'useThemeRoller');
 		var isRTL = this._get(inst, 'isRTL');
 		var prompt = this._get(inst, 'prompt');
 		var layout = this._get(inst, 'layout');
 		var base = this._get(inst, 'base');
 		var useDegrees = this._get(inst, 'useDegrees');
-		var html = (!prompt ? '' :
-			'<div class="calculator-prompt">' + prompt + '</div>') +
-			'<div class="calculator-result' + (inst._focussed ? ' ' + this._focussedClass: '') +
-			'"><span>' + inst.dispValue + '</span></div>';
+		var html = (!prompt ? '' : '<div class="calculator-prompt' +
+			(useTR ? ' ui-widget-header ui-corner-all' : '') + '">' + prompt + '</div>') +
+			'<div class="calculator-result' + (useTR ? ' ui-widget-header' : '' ) +
+			(inst._focussed ? ' ' + this._focussedClass: '') + '"><span>' +
+			inst.dispValue + '</span></div>';
 		for (var i = 0; i < layout.length; i++) {
 			html += '<div class="calculator-row">';
 			for (var j = 0; j < layout[i].length; j += 2) {
@@ -789,14 +796,18 @@ $.extend(Calculator.prototype, {
 					styles[k] = 'calculator-' + styles[k];
 				}
 				styles = styles.join(' ');
+				var uiActive = (useTR ? ' ui-state-active' : '');
+				var uiHighlight = (useTR ? ' ui-state-highlight' : '');
 				html += (def[1] == this.space ? '<span class="calculator-' + def[3] + '"></span>' :
 					(inst._inline && (def[2] == '._close' || def[2] == '._erase') ? '' :
 					'<button type="button" keystroke="' + code + '"' +
 					// Control buttons
 					(def[1] == this.control ? ' class="calculator-ctrl' +
-					(def[0].replace(/^#base/, '') == base ? ' calculator-base-active' : '') +
-					(def[0] == '#degrees' && useDegrees ? ' calculator-angle-active' : '') +
-					(def[0] == '#radians' && !useDegrees ? ' calculator-angle-active' : '') :
+					(def[0].match(/^#base/) ? (def[0].replace(/^#base/, '') == base ?
+					uiActive || ' calculator-base-active' : uiHighlight) :
+					(def[0] == '#degrees' ? (useDegrees ? uiActive || ' calculator-angle-active' : uiHighlight) :
+					(def[0] == '#radians' ? (!useDegrees ? uiActive || ' calculator-angle-active' : uiHighlight) :
+					uiHighlight))) :
 					// Digits
 					(def[1] == this.digit ? (parseInt(def[0], 16) >= base || (base != 10 && def[0] == '.') ?
 					' disabled="disabled"' : '') + ' class="calculator-digit' :
@@ -806,10 +817,12 @@ $.extend(Calculator.prototype, {
 					' class="calculator-oper' +
 					(def[0].match(/^#mem(Clear|Recall)$/) && !inst.memory ? ' calculator-mem-empty' : '')))) +
 					// Common
-					(styles ? ' ' + styles : '') + '" ' + (status ? 'title="' + status + '"' : '') + '>' +
+					(useTR ? ' ui-state-default' : '') + (styles ? ' ' + styles : '') + '" ' +
+					(status ? 'title="' + status + '"' : '') + '>' +
 					(code == '_.' ? this._get(inst, 'decimalChar') : label) +
 					// Keystrokes
-					(def[5] && def[5] != def[0] ? '<span class="' + this._keystrokeClass +
+					(def[5] && def[5] != def[0] ?
+					'<span class="' + this._keystrokeClass + (useTR ? ' ui-state-error' : '') +
 					(def[6] ? ' calculator-keyname' : '') + '">' + (def[6] || def[5]) + '</span>' : '') +
 					'</button>'));
 			}
@@ -819,9 +832,12 @@ $.extend(Calculator.prototype, {
 			(!inst._inline && $.browser.msie && parseInt($.browser.version, 10) < 7 ? // IE6- only
 			'<iframe src="javascript:false;" class="' + this._coverClass + '"></iframe>' : '');
 		html = $(html);
-		html.find('button').mousedown(function() { $(this).addClass('calculator-key-down'); }).
-			mouseup(function() { $(this).removeClass('calculator-key-down'); }).
-			mouseout(function() { $(this).removeClass('calculator-key-down'); }).
+		html.find('button').mouseover(function() { $.calculator._saveClasses = this.className; }).
+			mousedown(function() {
+				$(this).addClass('calculator-key-down' + (useTR ? ' ui-state-active' : ''));
+			}).
+			mouseup(function() { $(this).removeClass().addClass($.calculator._saveClasses); }).
+			mouseout(function() { $(this).removeClass().addClass($.calculator._saveClasses); }).
 			click(function() { $.calculator._handleButton(inst, $(this)); });
 		return html;
 	},
