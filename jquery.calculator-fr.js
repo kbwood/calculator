@@ -4,6 +4,7 @@
 (function($) { // hide the namespace
 
 $.calculator.regional['fr'] = {
+	decimalChar: ',',
 	buttonText: '...', buttonStatus: 'Ouvrir la calculatrice',
 	closeText: 'Fermer', closeStatus: 'Fermer la calculatrice',
 	useText: 'Utiliser', useStatus: 'Utiliser la valeur actuelle',

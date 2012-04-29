@@ -4,6 +4,7 @@
 (function($) {
 
 $.calculator.regional['pt-BR'] = {
+	decimalChar: ',',
 	buttonText: '...', buttonStatus: 'Abrir a calculadora',
 	closeText: 'Fechar', closeStatus: 'Fechar a calculadora',
 	useText: 'Usar', useStatus: 'Usar o valor atual',

@@ -4,6 +4,7 @@
 (function($) { // hide the namespace
 
 $.calculator.regional['nl'] = {
+	decimalChar: ',',
 	buttonText: '...', buttonStatus: 'Calculator openen',
 	closeText: 'Sluiten', closeStatus: 'Calculator sluiten',
 	useText: 'Gebruiken', useStatus: 'Huidige waarde gebruiken',
