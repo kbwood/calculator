@@ -1,5 +1,5 @@
 ﻿/* http://keith-wood.name/calculator.html
-   Calculator field entry extension for jQuery v1.2.3.
+   Calculator field entry extension for jQuery v1.2.4.
    Written by Keith Wood (kbwood{at}iinet.com.au) October 2008.
    Dual licensed under the GPL (http://dev.jquery.com/browser/trunk/jquery/GPL-LICENSE.txt) and 
    MIT (http://dev.jquery.com/browser/trunk/jquery/MIT-LICENSE.txt) licenses. 
@@ -464,8 +464,9 @@ $.extend(Calculator.prototype, {
 		offset = $.calculator._checkOffset(inst, offset, isFixed);
 		inst._mainDiv.css({position: (isFixed ? 'fixed' : 'absolute'), display: 'none',
 			left: offset.left + 'px', top: offset.top + 'px'});
-		var showAnim = $.calculator._get(inst, 'showAnim') || 'show';
+		var showAnim = $.calculator._get(inst, 'showAnim');
 		var duration = $.calculator._get(inst, 'duration');
+		duration = (duration == 'normal' && $.ui && $.ui.version >= '1.8' ? '_default' : duration);
 		var postProcess = function() {
 			$.calculator._showingCalculator = true;
 			var borders = $.calculator._getBorders(inst._mainDiv);
@@ -478,9 +479,9 @@ $.extend(Calculator.prototype, {
 				duration, postProcess);
 		}
 		else {
-			inst._mainDiv[showAnim](duration, postProcess);
+			inst._mainDiv[showAnim || 'show']((showAnim ? duration : ''), postProcess);
 		}
-		if (duration == '') {
+		if (!showAnim) {
 			postProcess();
 		}
 		if (inst._input[0].type != 'hidden') {
@@ -605,13 +606,14 @@ $.extend(Calculator.prototype, {
 		}
 		if (this._showingCalculator) {
 			duration = (duration != null ? duration : this._get(inst, 'duration'));
+			duration = (duration == 'normal' && $.ui && $.ui.version >= '1.8' ? '_default' : duration);
 			var showAnim = this._get(inst, 'showAnim');
-			if (duration != '' && $.effects && $.effects[showAnim]) {
+			if ($.effects && $.effects[showAnim]) {
 				inst._mainDiv.hide(showAnim, this._get(inst, 'showOptions'), duration);
 			}
 			else {
-				inst._mainDiv[(duration == '' ? 'hide' : (showAnim == 'slideDown' ? 'slideUp' :
-					(showAnim == 'fadeIn' ? 'fadeOut' : 'hide')))](duration);
+				inst._mainDiv[(showAnim == 'slideDown' ? 'slideUp' :
+					(showAnim == 'fadeIn' ? 'fadeOut' : 'hide'))](showAnim ? duration : '');
 			}
 		}
 		var onClose = this._get(inst, 'onClose');
