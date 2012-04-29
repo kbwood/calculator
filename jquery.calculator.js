@@ -1,5 +1,5 @@
 ﻿/* http://keith-wood.name/calculator.html
-   Calculator field entry extension for jQuery v1.0.0.
+   Calculator field entry extension for jQuery v1.0.1.
    Written by Keith Wood (kbwood@virginbroadband.com.au) October 2008.
    Dual licensed under the GPL (http://dev.jquery.com/browser/trunk/jquery/GPL-LICENSE.txt) and 
    MIT (http://dev.jquery.com/browser/trunk/jquery/MIT-LICENSE.txt) licenses. 
@@ -160,6 +160,7 @@ function Calculator() {
 		prompt: '', // Text across the top of the calculator
 		layout: this.standardLayout, // Layout of keys
 		base: 10, // The numeric base for calculations
+		precision: 10, // The number of digits of precision to use in rounding for display
 		useDegrees: false, // True to use degress for trigonometric functions, false for radians
 		onButton: null, // Define a callback function when a button is activated
 		onClose: null // Define a callback function when the panel is closed
@@ -679,6 +680,18 @@ $.extend(Calculator.prototype, {
 		$.calculator._updateCalculator(inst);
 	},
 
+	/* Tidy the result to avoid JavaScript rounding errors.
+	   @param  value      (number) the number to tidy
+	   @param  precision  (number) the number of digits of precision to use */
+	_tidy: function(value, precision) {
+		var fixed = new Number(value).toFixed(precision).valueOf(); // Round to 14 digits precision
+		var exp = fixed.replace(/^.+(e.+)$/, '$1').replace(/^[^e].*$/, ''); // Extract exponent
+		if (exp) {
+			fixed = new Number(fixed.replace(/e.+$/, '')).toFixed(precision).valueOf(); // Round mantissa
+		}
+		return parseFloat(fixed.replace(/0+$/, '') + exp); // Recombine
+	},
+
 	/* Save a binary operation for later use.
 	   @param  inst   (object) the instance settings
 	   @param  op     (function) the binary function
@@ -689,7 +702,8 @@ $.extend(Calculator.prototype, {
 			inst._pendingOp(inst);
 			var base = $.calculator._get(inst, 'base');
 			inst.curValue = (base == 10 ? inst.curValue : Math.floor(inst.curValue));
-			inst.dispValue = inst.curValue.toString(base).toUpperCase();
+			inst.dispValue = $.calculator._tidy(inst.curValue,
+				$.calculator._get(inst, 'precision')).toString(base).toUpperCase();
 		}
 		inst.prevValue = inst.curValue;
 		inst._newValue = true;
@@ -728,7 +742,8 @@ $.extend(Calculator.prototype, {
 		op(inst);
 		var base = $.calculator._get(inst, 'base');
 		inst.curValue = (base == 10 ? inst.curValue : Math.floor(inst.curValue));
-		inst.dispValue = inst.curValue.toString(base).toUpperCase();
+		inst.dispValue = $.calculator._tidy(inst.curValue,
+			$.calculator._get(inst, 'precision')).toString(base).toUpperCase();
 		$.calculator._sendButton(inst, label);
 		$.calculator._updateCalculator(inst);
 	},
@@ -833,8 +848,10 @@ $.extend(Calculator.prototype, {
 	},
 
 	_atrig: function(inst, op) {
-		var useDegrees = $.calculator._get(inst, 'useDegrees');
-		inst.curValue = op(inst.curValue) * (useDegrees ? 180 / Math.PI : 1);
+		inst.curValue = op(inst.curValue);
+		if ($.calculator._get(inst, 'useDegrees')) {
+			inst.curValue = inst.curValue / Math.PI * 180;
+		}
 	},
 
 	_inverse: function(inst) {
@@ -961,8 +978,7 @@ $.extend(Calculator.prototype, {
 	   @param  label  (string) the button label */
 	_use: function(inst, label) {
 		inst = $.calculator._getInst(inst);
-		$.calculator._finished(inst, label, inst.curValue.
-			toString($.calculator._get(inst, 'base')).toUpperCase());
+		$.calculator._finished(inst, label, inst.dispValue);
 	},
 
 	/* Erase the field and close the calculator.
