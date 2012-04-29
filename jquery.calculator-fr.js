@@ -1,6 +1,6 @@
 ﻿/* http://keith-wood.name/calculator.html
    French initialisation for the jQuery calculator extension
-   Written by Keith Wood (kbwood@virginbroadband.com.au) October 2008. */
+   Written by Keith Wood (kbwood{at}iinet.com.au) October 2008. */
 (function($) { // hide the namespace
 
 $.calculator.regional['fr'] = {

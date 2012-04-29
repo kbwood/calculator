@@ -1,5 +1,5 @@
 ﻿/* http://keith-wood.name/calculator.html
-   Calculator field entry extension for jQuery v1.2.2.
+   Calculator field entry extension for jQuery v1.2.3.
    Written by Keith Wood (kbwood{at}iinet.com.au) October 2008.
    Dual licensed under the GPL (http://dev.jquery.com/browser/trunk/jquery/GPL-LICENSE.txt) and 
    MIT (http://dev.jquery.com/browser/trunk/jquery/MIT-LICENSE.txt) licenses. 
@@ -45,15 +45,15 @@ function Calculator() {
 		'_/': ['/', this.binary, this._divide, 'arith divide', 'DIVIDE', '/'],
 		'_%': ['%', this.unary, this._percent, 'arith percent', 'PERCENT', '%'],
 		'_=': ['=', this.unary, this._equals, 'arith equals', 'EQUALS', '='],
-		'PI': ['pi', this.unary, this._pi, 'pi', 'PI', 'p'],
 		'+-': ['±', this.unary, this._plusMinus, 'arith plus-minus', 'PLUS_MINUS', '#'],
-		'1X': ['1/x', this.unary, this._inverse, 'inverse', 'INV', 'i'],
-		'LG': ['log', this.unary, this._log, 'log', 'LOG', 'l'],
-		'LN': ['ln', this.unary, this._ln, 'ln', 'LN', 'n'],
-		'EX': ['eⁿ', this.unary, this._exp, 'exp', 'EXP', 'E'],
-		'SQ': ['x²', this.unary, this._sqr, 'sqr', 'SQR', '@'],
-		'SR': ['√', this.unary, this._sqrt, 'sqrt', 'SQRT', '!'],
-		'XY': ['x^y', this.binary, this._power, 'power', 'POWER', '^'],
+		'PI': ['pi', this.unary, this._pi, 'pi', 'PI', 'p'],
+		'1X': ['1/x', this.unary, this._inverse, 'fn inverse', 'INV', 'i'],
+		'LG': ['log', this.unary, this._log, 'fn log', 'LOG', 'l'],
+		'LN': ['ln', this.unary, this._ln, 'fn ln', 'LN', 'n'],
+		'EX': ['eⁿ', this.unary, this._exp, 'fn exp', 'EXP', 'E'],
+		'SQ': ['x²', this.unary, this._sqr, 'fn sqr', 'SQR', '@'],
+		'SR': ['√', this.unary, this._sqrt, 'fn sqrt', 'SQRT', '!'],
+		'XY': ['x^y', this.binary, this._power, 'fn power', 'POWER', '^'],
 		'RN': ['rnd', this.unary, this._random, 'random', 'RANDOM', '?'],
 		'SN': ['sin', this.unary, this._sin, 'trig sin', 'SIN', 's'],
 		'CS': ['cos', this.unary, this._cos, 'trig cos', 'COS', 'o'],
@@ -144,6 +144,7 @@ function Calculator() {
 			// 'opbutton' for operator/button combination
 		buttonImage: '', // URL for trigger button image
 		buttonImageOnly: false, // True if the image appears alone, false if it appears on a button
+		isOperator: null, // Call back function to determine if a keystroke opens the calculator
 		showAnim: 'show', // Name of jQuery animation for popup
 		showOptions: {}, // Options for enhanced animations
 		duration: 'normal', // Duration of display/closure
@@ -151,6 +152,7 @@ function Calculator() {
 		calculatorClass: '', // Additional CSS class for the calculator for an instance
 		prompt: '', // Text across the top of the calculator
 		layout: this.standardLayout, // Layout of keys
+		value: 0, // The initial value for inline calculators
 		base: 10, // The numeric base for calculations
 		precision: 10, // The number of digits of precision to use in rounding for display
 		useDegrees: false, // True to use degress for trigonometric functions, false for radians
@@ -245,6 +247,7 @@ $.extend(Calculator.prototype, {
 			$target.append(keyEntry).append(inst._mainDiv).
 				bind('click.calculator', function() { keyEntry.focus(); });
 			this._reset(inst, '0', true);
+			this._setValue(inst);
 			this._updateCalculator(inst);
 		}
 	},
@@ -420,6 +423,9 @@ $.extend(Calculator.prototype, {
 				this._hideCalculator();
 			}
 			extendRemove(inst.settings, settings);
+			if (inst._inline) {
+				this._setValue(inst);
+			}
 			this._updateCalculator(inst);
 		}
 	},
@@ -498,6 +504,13 @@ $.extend(Calculator.prototype, {
 		inst.memory = (clearMem ? 0 : inst.memory);
 		inst._pendingOp = inst._savedOp = this._noOp;
 		inst._newValue = true;
+	},
+
+	/* Set the initial value for display.
+	   @param  inst  (object) the instance settings */
+	_setValue: function(inst) {
+		inst.curValue = this._get(inst, 'value') || 0;
+		inst.dispValue = this._setDisplay(inst);
 	},
 
 	/* Generate the calculator content.
@@ -698,10 +711,10 @@ $.extend(Calculator.prototype, {
 		var base = $.calculator._get(inst, 'base');
 		var decimalChar = $.calculator._get(inst, 'decimalChar');
 		var showOn = $.calculator._get(inst, 'showOn');
+		var isOperator = $.calculator._get(inst, 'isOperator') || $.calculator._isOperator;
 		if (!$.calculator._showingCalculator && !div &&
-				(showOn == 'operator' || showOn == 'opbutton') && ch > ' ' &&
-				('0123456789abcdef'.substr(0, base) + '.' + decimalChar).indexOf(ch.toLowerCase()) == -1 &&
-				!(ch == '-' && inst._input.val() == '')) {
+				(showOn == 'operator' || showOn == 'opbutton') && 
+				isOperator.apply(inst._input, [ch, e, inst._input.val(), base, decimalChar])) {
 			$.calculator._showCalculator(this); // display the date picker on operator usage
 			$.calculator._showingCalculator = true;
 		}
@@ -719,6 +732,18 @@ $.extend(Calculator.prototype, {
 			return (inst._input.val() + ch).toLowerCase().match(pattern) != null;
 		}
 		return true;
+	},
+
+	/* Determine whether or not a keystroke is a trigger for opening the calculator.
+	   @param  ch           (char) the current character
+	   @param  event        (KeyEvent) the entire key event
+	   @param  value        (string) the current input value
+	   @param  base         (number) the current number base
+	   @param  decimalChar  (char) the current decimal character
+	   @return  true if a trigger, false if not */
+	_isOperator: function(ch, event, value, base, decimalChar) {
+		return ch > ' ' && !(ch == '-' && value == '') &&
+			('0123456789abcdef'.substr(0, base) + '.' + decimalChar).indexOf(ch.toLowerCase()) == -1;
 	},
 
 	/* Get a setting value, defaulting if necessary.
