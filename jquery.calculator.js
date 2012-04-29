@@ -1,5 +1,5 @@
 ﻿/* http://keith-wood.name/calculator.html
-   Calculator field entry extension for jQuery v1.2.4.
+   Calculator field entry extension for jQuery v1.2.5.
    Written by Keith Wood (kbwood{at}iinet.com.au) October 2008.
    Dual licensed under the GPL (http://dev.jquery.com/browser/trunk/jquery/GPL-LICENSE.txt) and 
    MIT (http://dev.jquery.com/browser/trunk/jquery/MIT-LICENSE.txt) licenses. 
@@ -157,6 +157,7 @@ function Calculator() {
 		precision: 10, // The number of digits of precision to use in rounding for display
 		useDegrees: false, // True to use degress for trigonometric functions, false for radians
 		constrainInput: true, // True to restrict typed characters to numerics, false to allow anything
+		onOpen: null, // Define a callback function before the panel is opened
 		onButton: null, // Define a callback function when a button is activated
 		onClose: null // Define a callback function when the panel is closed
 	};
@@ -458,6 +459,12 @@ $.extend(Calculator.prototype, {
 		// determine sizing offscreen
 		inst._mainDiv.css({position: 'absolute', display: 'block', top: '-1000px',
 			width: ($.browser.opera ? '1000px' : 'auto')});
+		// callback before calculator opening		
+		var onOpen = $.calculator._get(inst, 'onOpen');
+		if (onOpen) {
+			onOpen.apply((inst._input ? inst._input[0] : null),  // trigger custom callback
+				[(inst._inline ? inst.curValue : inst._input.val()), inst]);
+		}
 		$.calculator._reset(inst, inst._input.val(), true);
 		$.calculator._updateCalculator(inst);
 		// and adjust position before showing
@@ -1215,7 +1222,7 @@ function extendRemove(target, props) {
 		}
 	}
 	return target;
-};
+}
 
 /* Invoke the calculator functionality.
    @param  options  (string) a command, optionally followed by additional parameters or
