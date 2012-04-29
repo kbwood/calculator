@@ -1,5 +1,5 @@
 ﻿/* http://keith-wood.name/calculator.html
-   Calculator field entry extension for jQuery v1.1.0.
+   Calculator field entry extension for jQuery v1.1.1.
    Written by Keith Wood (kbwood@virginbroadband.com.au) October 2008.
    Dual licensed under the GPL (http://dev.jquery.com/browser/trunk/jquery/GPL-LICENSE.txt) and 
    MIT (http://dev.jquery.com/browser/trunk/jquery/MIT-LICENSE.txt) licenses. 
@@ -139,8 +139,9 @@ function Calculator() {
 		isRTL: false // True if right-to-left language, false if left-to-right
 	};
 	this._defaults = { // Global defaults for all the calculator instances
-		showOn: 'focus', // 'focus' for popup on focus,
-			// 'button' for trigger button, or 'both' for either
+		showOn: 'focus', // 'focus' for popup on focus, 'button' for trigger button,
+			// 'both' for either, 'operator' for non-numeric character entered,
+			// 'opbutton' for operator/button combination
 		buttonImage: '', // URL for trigger button image
 		buttonImageOnly: false, // True if the image appears alone, false if it appears on a button
 		showAnim: 'show', // Name of jQuery animation for popup
@@ -153,6 +154,7 @@ function Calculator() {
 		base: 10, // The numeric base for calculations
 		precision: 10, // The number of digits of precision to use in rounding for display
 		useDegrees: false, // True to use degress for trigonometric functions, false for radians
+		constrainInput: true, // True to restrict typed characters to numerics, false to allow anything
 		onButton: null, // Define a callback function when a button is activated
 		onClose: null // Define a callback function when the panel is closed
 	};
@@ -271,7 +273,7 @@ $.extend(Calculator.prototype, {
 			if (showOn == 'focus' || showOn == 'both') { // pop-up calculator when in the marked field
 				control.focus(this._showCalculator);
 			}
-			if (showOn == 'button' || showOn == 'both') { // pop-up calculator when button clicked
+			if (showOn == 'button' || showOn == 'both' || showOn == 'opbutton') { // pop-up calculator when button clicked
 				var buttonText = this._get(inst, 'buttonText');
 				var buttonStatus = this._get(inst, 'buttonStatus');
 				var buttonImage = this._get(inst, 'buttonImage');
@@ -463,9 +465,9 @@ $.extend(Calculator.prototype, {
 		var duration = $.calculator._get(inst, 'duration');
 		var postProcess = function() {
 			$.calculator._showingCalculator = true;
-			if (!inst._inline && $.browser.msie && parseInt($.browser.version) < 7) {
+			if (!inst._inline && $.browser.msie && parseInt($.browser.version, 10) < 7) {
 				// fix IE < 7 select problems
-				var extras = this._getExtras(inst._mainDiv);
+				var extras = $.calculator._getExtras(inst._mainDiv);
 				$('iframe.' + $.calculator._coverClass).css({
 					width: inst._mainDiv.width() + extras[0],
 					height: inst._mainDiv.height() + extras[1]});
@@ -494,12 +496,12 @@ $.extend(Calculator.prototype, {
 		var convert = function(value) {
 			return {thin: 1, medium: 2, thick: 3}[value] || value;
 		};
-		return [parseInt(convert(elem.css('border-left-width'))) +
-			parseInt(convert(elem.css('border-right-width'))) +
-			parseInt(elem.css('padding-left')) + parseInt(elem.css('padding-right')),
-			parseInt(convert(elem.css('border-top-width'))) +
-			parseInt(convert(elem.css('border-bottom-width'))) +
-			parseInt(elem.css('padding-top')) + parseInt(elem.css('padding-bottom'))];
+		return [parseInt(convert(elem.css('border-left-width')), 10) +
+			parseInt(convert(elem.css('border-right-width')), 10) +
+			parseInt(elem.css('padding-left'), 10) + parseInt(elem.css('padding-right'), 10),
+			parseInt(convert(elem.css('border-top-width')), 10) +
+			parseInt(convert(elem.css('border-bottom-width')), 10) +
+			parseInt(elem.css('padding-top'), 10) + parseInt(elem.css('padding-bottom'), 10)];
 	},
 
 	/* Reinitialise the calculator.
@@ -527,8 +529,8 @@ $.extend(Calculator.prototype, {
 			find('iframe.' + $.calculator._coverClass).
 			css({width: dims.width, height: dims.height});
 		inst._mainDiv.removeClass().
-			addClass(this._get(inst, 'calculatorClass') +
-			(this._get(inst, 'isRTL') ? ' calculator-rtl' : '') +
+			addClass(this._get(inst, 'calculatorClass') + ' ' +
+			(this._get(inst, 'isRTL') ? 'calculator-rtl ' : '') +
 			(inst._inline ? this._inlineClass : ''));
 		if (this._curInst == inst) {
 			inst._input.focus();
@@ -546,12 +548,12 @@ $.extend(Calculator.prototype, {
 		var browserHeight = window.innerHeight || document.documentElement.clientHeight;
 		var scrollX = document.documentElement.scrollLeft || document.body.scrollLeft;
 		var scrollY = document.documentElement.scrollTop || document.body.scrollTop;
-		if (($.browser.msie && $.browser.version < '7.0') || $.browser.opera) {
+		if (($.browser.msie && parseInt($.browser.version, 10) < 7) || $.browser.opera) {
 			// recalculate width as otherwise set to 100%
 			var width = 0;
 			$('.calculator-row', inst._mainDiv).find('button:last').each(function() {
 				width = Math.max(width, this.offsetLeft + this.offsetWidth +
-					parseInt($(this).css('margin-right')));
+					parseInt($(this).css('margin-right'), 10));
 			});
 			inst._mainDiv.css('width', width);
 		}
@@ -627,10 +629,9 @@ $.extend(Calculator.prototype, {
 			return;
 		}
 		var target = $(event.target);
-		if (target[0].id != $.calculator._mainDivId &&
-				target.parents('#' + $.calculator._mainDivId).length == 0 &&
+		if (!target.parents().andSelf().is('#' + $.calculator._mainDivId) &&
 				!target.hasClass($.calculator.markerClassName) &&
-				!target.hasClass($.calculator._triggerClass) &&
+				!target.parents().andSelf().hasClass($.calculator._triggerClass) &&
 				$.calculator._showingCalculator) {
 			$.calculator._hideCalculator(null, '');
 		}
@@ -673,6 +674,7 @@ $.extend(Calculator.prototype, {
 			e.preventDefault();
 			e.stopPropagation();
 		}
+		return !handled;
 	},
 
 	/* Hide keystrokes, if showing.
@@ -690,13 +692,25 @@ $.extend(Calculator.prototype, {
 	_doKeyPress: function(e) {
 		var inst = $.data(e.target, PROP_NAME);
 		var div = (inst && inst._inline ? $(e.target).parent()[0] : null);
+		var ch = String.fromCharCode(e.charCode == undefined ? e.keyCode : e.charCode);
+		var showOn = $.calculator._get(inst, 'showOn');
+		if (!$.calculator._showingCalculator && !div &&
+				(showOn == 'operator' || showOn == 'opbutton') &&
+				ch > ' ' && ch != '.' && (ch < '0' || ch > '9')) {
+			$.calculator._showCalculator(this); // display the date picker on operator usage
+			$.calculator._showingCalculator = true;
+		}
 		if ($.calculator._showingCalculator ||
 				(div && !$.calculator._isDisabledCalculator(div))) {
-			var code = $.calculator._keyChars[String.fromCharCode(e.charCode || e.keyCode)];
+			var code = $.calculator._keyChars[ch];
 			if (code) {
 				$('button[keystroke=' + code + ']', inst._mainDiv).not(':disabled').click();
 			}
 			return false;
+		}
+		if ($.calculator._get(inst, 'constrainInput')) {
+			return ch != ' ' && (ch < ' ' || !isNaN(inst._input.val() + ch) ||
+				(!inst._input.val() && '.-'.indexOf(ch) > -1));
 		}
 		return true;
 	},
@@ -771,7 +785,7 @@ $.extend(Calculator.prototype, {
 			html += '</div>';
 		}
 		html += '<div style="clear: both;"></div>' + 
-			(!inst._inline && $.browser.msie && parseInt($.browser.version) < 7 ? 
+			(!inst._inline && $.browser.msie && parseInt($.browser.version, 10) < 7 ? 
 			'<iframe src="javascript:false;" class="' + $.calculator._coverClass + '"></iframe>' : '');
 		return html;
 	},

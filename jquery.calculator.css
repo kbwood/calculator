@@ -1,6 +1,7 @@
 /* Main style sheet for jQuery Calculator */
 button.calculator-trigger {
 	width: 25px;
+	padding: 0px;
 }
 img.calculator-trigger {
 	margin: 2px;
@@ -31,7 +32,7 @@ img.calculator-trigger {
 	z-index: 100;
 	background-color: white;
 	opacity: 0.5;
-	filter: Alpha(Opacity=50);
+	filter: alpha(opacity=50);
 }
 .calculator-rtl {
 	direction: rtl;
