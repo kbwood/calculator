@@ -16,6 +16,23 @@ img.calculator-trigger {
 	background-color: #f4f4f4;
 	font-family: Arial,Helvetica,sans-serif;
 }
+.calculator-keyentry {
+	width: 0px;
+	z-index: -10;
+}
+.calculator-inline {
+	position: relative;
+	top: -1.5em;
+	border: 1px solid #888;
+	background-color: #f4f4f4;
+}
+.calculator-disabled {
+	position: absolute;
+	z-index: 100;
+	background-color: white;
+	opacity: 0.5;
+	filter: Alpha(Opacity=50);
+}
 .calculator-rtl {
 	direction: rtl;
 }
@@ -32,6 +49,9 @@ img.calculator-trigger {
 	background-color: #fff;
 	border: 1px inset #000;
 	font-size: 110%;
+}
+.calculator-focussed {
+	background-color: #ffc;
 }
 .calculator-row {
 	clear: both;
