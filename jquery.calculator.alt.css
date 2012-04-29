@@ -1,4 +1,4 @@
-/* Main style sheet for jQuery Calculator v1.2.2 */
+/* Alternative (native) style sheet for jQuery Calculator v1.2.2 */
 div.hasCalculator, span.hasCalculator {
 	position: relative;
 }
@@ -90,16 +90,11 @@ img.calculator-trigger {
 	margin: 2px;
 	padding: 0px;
 	height: 22px;
-	background-color: #f4f4f4;
-	border-radius: 4px;
-	-moz-border-radius: 4px;
-	-webkit-border-radius: 4px;
 	text-align: center;
 	cursor: pointer;
 }
 .calculator-row .calculator-ctrl {
 	width: 60px;
-	background-color: #e8e8e8;
 }
 .calculator-row .calculator-undo, .calculator-row .calculator-clear-error, .calculator-row .calculator-clear {
 	width: 28px;
@@ -109,7 +104,7 @@ img.calculator-trigger {
 	font-size: 70%;
 }
 .calculator-row .calculator-base-active, .calculator-row .calculator-angle-active {
-	border: 2px inset #fff;
+	border: 1px inset #fff;
 }
 .calculator-digit, .calculator-oper {
 	width: 28px;
@@ -126,8 +121,6 @@ img.calculator-trigger {
 	}
 }
 .calculator-key-down {
-	-moz-border-radius: 4px;
-	-webkit-border-radius: 4px;
 }
 .calculator-keystroke {
 	display: none;

@@ -1,5 +1,5 @@
 ﻿/* http://keith-wood.name/calculator.html
-   Calculator field entry extension for jQuery v1.2.1.
+   Calculator field entry extension for jQuery v1.2.2.
    Written by Keith Wood (kbwood{at}iinet.com.au) October 2008.
    Dual licensed under the GPL (http://dev.jquery.com/browser/trunk/jquery/GPL-LICENSE.txt) and 
    MIT (http://dev.jquery.com/browser/trunk/jquery/MIT-LICENSE.txt) licenses. 
@@ -641,7 +641,7 @@ $.extend(Calculator.prototype, {
 		var handled = false;
 		var inst = $.data(e.target, PROP_NAME);
 		var div = (inst && inst._inline ? $(e.target).parent()[0] : null);
-		if (e.keyCode == 9) {
+		if (e.keyCode == 9) { // tab
 			$.calculator.mainDiv.stop(true, true);
 			$.calculator._hideCalculator(null, '');
 			if (inst && inst._inline) {
@@ -713,16 +713,10 @@ $.extend(Calculator.prototype, {
 			}
 			return false;
 		}
-		if ($.calculator._get(inst, 'constrainInput')) {
-			var dispIn = (inst._input.val() + ch).replace(/^0(\d)/, '$1').
-				replace(new RegExp('^(-?)([\\.' + decimalChar + '])'), '$10$2');
-			var value = (decimalChar != '.' ? dispIn.replace(new RegExp(decimalChar), '.') : dispIn);
-			value = (base == 10 ? parseFloat(value) : parseInt(value, base));
-			var dispOut = value.toString(base).replace(/\./, decimalChar) +
-				(ch == decimalChar && inst._input.val().indexOf(decimalChar) == -1 ? ch : '');
-			dispOut = (dispIn.charAt(0) == '-' && dispOut.charAt(0) != '-' ? '-' : '') + dispOut;
-			return ch != ' ' && (ch < ' ' || dispIn == dispOut ||
-				(!inst._input.val() && (decimalChar + '.-').indexOf(ch) > -1));
+		if (ch >= ' ' && $.calculator._get(inst, 'constrainInput')) {
+			var pattern = new RegExp('^-?' + (base == 10 ? '[0-9]*(\\' + decimalChar + '[0-9]*)?' :
+				'[' + '0123456789abcdef'.substring(0, base) + ']*') + '$');
+			return (inst._input.val() + ch).toLowerCase().match(pattern) != null;
 		}
 		return true;
 	},
