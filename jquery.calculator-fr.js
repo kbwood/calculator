@@ -1,6 +1,6 @@
 ﻿/* http://keith-wood.name/calculator.html
    French initialisation for the jQuery calculator extension
-   Written by Keith Wood (kbwood{at}iinet.com.au) October 2008. */
+   Written by PiwEL (piwel{at}piwel.fr). */
 (function($) { // hide the namespace
 
 $.calculator.regional['fr'] = {
@@ -11,18 +11,18 @@ $.calculator.regional['fr'] = {
 	eraseText: 'Effacer', eraseStatus: 'Effacer la valeur',
 	backspaceText: 'DF', backspaceStatus: 'Effacer le dernier chiffre',
 	clearErrorText: 'CE', clearErrorStatus: 'Effacer le dernier nombre',
-	clearText: 'CT', clearStatus: 'Régler la calculatrice',
-	memClearText: 'MD', memClearStatus: 'Dégager la mémoire',
-	memRecallText: 'MS', memRecallStatus: 'Souvener de la valeur de mémoire',
-	memStoreText: 'MC', memStoreStatus: 'Conserver la valeur dans la mémoire',
+	clearText: 'CT', clearStatus: 'Réinitialiser la calculatrice',
+	memClearText: 'MD', memClearStatus: 'Vider la mémoire',
+	memRecallText: 'MS', memRecallStatus: 'Récupérer la valeur de la mémoire',
+	memStoreText: 'MC', memStoreStatus: 'Sauvegarder la valeur dans la mémoire',
 	memAddText: 'M+', memAddStatus: 'Ajouter à la mémoire',
-	memSubtractText: 'M-', memSubtractStatus: 'Soustrayer de mémoire',
-	base2Text: 'Bin', base2Status: 'Changement aux nombres binaires',
-	base8Text: 'Oct', base8Status: 'Changement aux nombres octal',
-	base10Text: 'Déc', base10Status: 'Changement aux nombres décimale',
-	base16Text: 'Hex', base16Status: 'Changement aux nombres hexadécimal',
-	degreesText: 'Deg', degreesStatus: 'Changement aux degrés',
-	radiansText: 'Rad', radiansStatus: 'Changement aux radians',
+	memSubtractText: 'M-', memSubtractStatus: 'Supprimer de la mémoire',
+	base2Text: 'Bin', base2Status: 'Conversion en binaire',
+	base8Text: 'Oct', base8Status: 'Conversion en octal',
+	base10Text: 'Déc', base10Status: 'Conversion en décimal',
+	base16Text: 'Hex', base16Status:  'Conversion en hexadécimal',
+	degreesText: 'Deg', degreesStatus: ' Conversion en degrés',
+	radiansText: 'Rad', radiansStatus: ' Conversion en radians',
 	isRTL: false
 };
 $.calculator.setDefaults($.calculator.regional['fr']);
