@@ -134,6 +134,7 @@ function Calculator() {
 		degreesStatus: 'Switch to degrees', // Status text for degrees link
 		radiansText: 'Rad', // Display text for radians link
 		radiansStatus: 'Switch to radians', // Status text for radians link
+		popupTitle : 'Calculator Popup',
 		isRTL: false // True if right-to-left language, false if left-to-right
 	};
 	this._defaults = { // Global defaults for all the calculator instances
@@ -319,10 +320,17 @@ $.extend(Calculator.prototype, {
 				});
 			}
 		}
-		inst._input.bind('keydown.' + plugin.propertyName, this._doKeyDown).
+		if (!inst._inline) {
+          		inst._mainDiv.bind('keydown.' + plugin.propertyName, this._doKeyDown).
+				bind('keyup.' + plugin.propertyName, this._doKeyUp).
+				bind('keypress.' + plugin.propertyName, this._doKeyPress);
+        	};
+		
+		if (inst._inline) {
+			inst._input.bind('keydown.' + plugin.propertyName, this._doKeyDown).
 			bind('keyup.' + plugin.propertyName, this._doKeyUp).
 			bind('keypress.' + plugin.propertyName, this._doKeyPress);
-		if (inst._inline) {
+			
 			inst._mainDiv.bind('keydown.' + plugin.propertyName, this._doKeyDown).
 				bind('keyup.' + plugin.propertyName, this._doKeyUp).
 				bind('keypress.' + plugin.propertyName, this._doKeyPress);
@@ -392,6 +400,7 @@ $.extend(Calculator.prototype, {
 			return;
 		}
 		var inst = target.data(this.propertyName);
+		inst._mainDiv.unbind('.' + plugin.propertyName);
 		inst._input.unbind('.' + plugin.propertyName).
 			removeData(this.propertyName);
 		target.removeClass(this.markerClassName).empty().
@@ -533,9 +542,12 @@ $.extend(Calculator.prototype, {
 		if (!inst.options.showAnim) {
 			postProcess();
 		}
-		if (inst._input[0].type != 'hidden') {
-			inst._input[0].focus();
-		}
+		inst._mainDiv.attr("aria-label",inst.options.popupTitle)
+		        .attr("role","application")
+                	.attr("aria-atomic","true")
+		        .attr("aria-live","assertive" )
+		        .attr("aria-relevant","all" )
+		        .attr("tabindex","0").focus();
 		plugin._curInst = inst;
 	},
 
@@ -603,9 +615,6 @@ $.extend(Calculator.prototype, {
 			(inst.options.useThemeRoller ? ' ui-widget ui-widget-content' : '') +
 			(inst.options.isRTL ? ' ' + plugin._rtlClass : '') + ' ' +
 			(inst._inline ? this._inlineClass : this._mainDivClass));
-		if (this._curInst == inst) {
-			inst._input.focus();
-		}
 	},
 
 	/* Retrieve the size of left and top borders for an element.
@@ -722,9 +731,7 @@ $.extend(Calculator.prototype, {
 
 	/* Focus back onto the input field. */
 	_focusEntry: function() {
-		if (plugin._curInst && plugin._curInst._input) {
-			plugin._curInst._input.focus();
-		}
+		// not required as we will have the focus on DIV always so that it is Accessibile
 	},
 
 	/* Handle keystrokes.
@@ -732,6 +739,9 @@ $.extend(Calculator.prototype, {
 	_doKeyDown: function(e) {
 		var handled = false;
 		var inst = $.data(e.target, plugin.propertyName);
+		if (!inst){
+		    inst = plugin._curInst;
+		}
 		var div = (inst && inst._inline ? $(e.target).parent()[0] : null);
 		if (e.keyCode == 9) { // tab
 			plugin.mainDiv.stop(true, true);
@@ -782,6 +792,9 @@ $.extend(Calculator.prototype, {
 	   @return  true if keystroke allowed, false if not */
 	_doKeyPress: function(e) {
 		var inst = $.data(e.target, plugin.propertyName);
+		if ( !inst ){
+		    inst = plugin._curInst;
+		}
 		if (!inst) {
 			return true;
 		}
@@ -948,9 +961,6 @@ $.extend(Calculator.prototype, {
 				this._binaryOp(inst, keyDef[2], label); break;
 			case this.unary:
 				this._unaryOp(inst, keyDef[2], label); break;
-		}
-		if (plugin._showingCalculator || inst._inline) {
-			inst._input.focus();
 		}
 	},
 
