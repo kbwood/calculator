@@ -1,8 +1,7 @@
 ﻿/* http://keith-wood.name/calculator.html
-   Calculator field entry extension for jQuery v1.4.0.
+   Calculator field entry extension for jQuery v1.4.1.
    Written by Keith Wood (kbwood{at}iinet.com.au) October 2008.
-   Dual licensed under the GPL (http://dev.jquery.com/browser/trunk/jquery/GPL-LICENSE.txt) and 
-   MIT (http://dev.jquery.com/browser/trunk/jquery/MIT-LICENSE.txt) licenses. 
+   Licensed under the MIT (https://github.com/jquery/jquery/blob/master/MIT-LICENSE.txt) licence. 
    Please attribute the author if you use it. */
    
 (function($) { // hide the namespace
@@ -191,7 +190,6 @@ $.extend(Calculator.prototype, {
 	_resultClass: 'calculator-result', // The name of the calculator result marker class
 	_focussedClass: 'calculator-focussed', // The name of the focussed marker class
 	_keystrokeClass: 'calculator-keystroke', // The name of the keystroke marker class
-	_coverClass: 'calculator-cover', // The name of the IE select cover marker class
 	_rtlClass: 'calculator-rtl', // The name of the right-to-left marker class
 	_rowClass: 'calculator-row', // The name of the row marker class
 	_ctrlClass: 'calculator-ctrl', // The name of the control key marker class
@@ -260,7 +258,7 @@ $.extend(Calculator.prototype, {
 		var keyEntry = (!inline ? $target :
 			$('<input type="text" class="' + this._inlineEntryClass + '"/>'));
 		var inst = {options: $.extend({}, this._defaults, options),
-			_input: keyEntry, _inline: inline, memory: 0,
+			_target: $target, _input: keyEntry, _inline: inline, memory: 0,
 			_mainDiv: (inline ? $('<div class="' + this._inlineClass + '"></div>') : this.mainDiv)};
 		if (inst.options.memoryAsCookie) {
 			var memory = this._getMemoryCookie(inst);
@@ -418,7 +416,7 @@ $.extend(Calculator.prototype, {
 				css({opacity: '1.0', cursor: ''});
 		}
 		else if (nodeName == 'div' || nodeName == 'span') {
-			control.find('.' + this._inlineEntryClass + ',button').removeAttr('disabled').end().
+			control.find('.' + this._inlineEntryClass + ',button').prop('disabled', false).end().
 				children('.' + this._disableClass).remove();
 		}
 		this._disabledFields = $.map(this._disabledFields,
@@ -450,11 +448,13 @@ $.extend(Calculator.prototype, {
 					return false;
 				}
 			});
-			control.find('.' + this._inlineEntryClass + ',button').attr('disabled', 'disabled').end().
-				prepend('<div class="' + this._disableClass + '" style="width: ' +
-				inline.outerWidth() + 'px; height: ' + inline.outerHeight() +
-				'px; left: ' + (offset.left - relOffset.left) +
-				'px; top: ' + (offset.top - relOffset.top) + 'px;"></div>');
+			control.find('.' + this._inlineEntryClass + ',button').prop('disabled', true);
+			if (control.find('.' + this._disableClass).length == 0) {
+				control.prepend('<div class="' + this._disableClass + '" style="width: ' +
+					inline.outerWidth() + 'px; height: ' + inline.outerHeight() +
+					'px; left: ' + (offset.left - relOffset.left) +
+					'px; top: ' + (offset.top - relOffset.top) + 'px;"></div>');
+			}
 		}
 		this._disabledFields = $.map(this._disabledFields,
 			function(value) { return (value == target ? null : value); }); // delete entry
@@ -487,15 +487,10 @@ $.extend(Calculator.prototype, {
 			isFixed |= $(this).css('position') == 'fixed';
 			return !isFixed;
 		});
-		if (isFixed && $.browser.opera) { // correction for Opera when fixed and scrolled
-			plugin._pos[0] -= document.documentElement.scrollLeft;
-			plugin._pos[1] -= document.documentElement.scrollTop;
-		}
 		var offset = {left: plugin._pos[0], top: plugin._pos[1]};
 		plugin._pos = null;
 		// determine sizing offscreen
-		inst._mainDiv.css({position: 'absolute', display: 'block', top: '-1000px',
-			width: ($.browser.opera ? '1000px' : 'auto')});
+		inst._mainDiv.css({position: 'absolute', display: 'block', top: '-1000px', width: 'auto'});
 		// callback before calculator opening		
 		if ($.isFunction(inst.options.onOpen)) {
 			inst.options.onOpen.apply((inst._input ? inst._input[0] : null),  // trigger custom callback
@@ -511,10 +506,6 @@ $.extend(Calculator.prototype, {
 		duration = (duration == 'normal' && $.ui && $.ui.version >= '1.8' ? '_default' : duration);
 		var postProcess = function() {
 			plugin._showingCalculator = true;
-			var borders = plugin._getBorders(inst._mainDiv);
-			inst._mainDiv.find('iframe.' + plugin._coverClass). // IE6- only
-				css({left: -borders[0], top: -borders[1],
-					width: inst._mainDiv.outerWidth(), height: inst._mainDiv.outerHeight()});
 		};
 		if ($.effects && $.effects[inst.options.showAnim]) {
 			var data = inst._mainDiv.data(); // Update old effects data
@@ -528,7 +519,7 @@ $.extend(Calculator.prototype, {
 		}
 		else {
 			inst._mainDiv[inst.options.showAnim || 'show'](
-				(inst.options.showAnim ? duration : ''), postProcess);
+				(inst.options.showAnim ? duration : null), postProcess);
 		}
 		if (!inst.options.showAnim) {
 			postProcess();
@@ -595,14 +586,14 @@ $.extend(Calculator.prototype, {
 	   @param  inst  (object) the instance settings */
 	_updateCalculator: function(inst) {
 		var borders = this._getBorders(inst._mainDiv);
-		inst._mainDiv.html(this._generateHTML(inst)).
-			find('iframe.' + this._coverClass). // IE6- only
-			css({left: -borders[0], top: -borders[1],
-				width: inst._mainDiv.outerWidth(), height: inst._mainDiv.outerHeight()});
-		inst._mainDiv.removeClass().addClass(inst.options.calculatorClass +
-			(inst.options.useThemeRoller ? ' ui-widget ui-widget-content' : '') +
-			(inst.options.isRTL ? ' ' + plugin._rtlClass : '') + ' ' +
-			(inst._inline ? this._inlineClass : this._mainDivClass));
+		inst._mainDiv.html(this._generateHTML(inst)).removeClass().
+			addClass(inst.options.calculatorClass +
+				(inst.options.useThemeRoller ? ' ui-widget ui-widget-content' : '') +
+				(inst.options.isRTL ? ' ' + plugin._rtlClass : '') + ' ' +
+				(inst._inline ? this._inlineClass : this._mainDivClass));
+		if (this._isDisabledPlugin(inst._target[0])) {
+			this._disablePlugin(inst._target[0]);
+		}
 		if (this._curInst == inst) {
 			inst._input.focus();
 		}
@@ -613,8 +604,7 @@ $.extend(Calculator.prototype, {
 	   @return  (number[2]) the left and top borders */
 	_getBorders: function(elem) {
 		var convert = function(value) {
-			var extra = ($.browser.msie ? 1 : 0);
-			return {thin: 1 + extra, medium: 3 + extra, thick: 5 + extra}[value] || value;
+			return {thin: 1, medium: 3, thick: 5}[value] || value;
 		};
 		return [parseFloat(convert(elem.css('border-left-width'))),
 			parseFloat(convert(elem.css('border-top-width')))];
@@ -631,34 +621,30 @@ $.extend(Calculator.prototype, {
 		var browserHeight = window.innerHeight || document.documentElement.clientHeight;
 		var scrollX = document.documentElement.scrollLeft || document.body.scrollLeft;
 		var scrollY = document.documentElement.scrollTop || document.body.scrollTop;
-		if (($.browser.msie && parseInt($.browser.version, 10) < 7) || $.browser.opera) {
-			// recalculate width as otherwise set to 100%
-			var width = 0;
-			$('.' + plugin.propertyName + '-row', inst._mainDiv).find('button:last').each(function() {
-				width = Math.max(width, this.offsetLeft + this.offsetWidth +
-					parseInt($(this).css('margin-right'), 10));
-			});
-			inst._mainDiv.css('width', width);
-		}
+		// recalculate width as otherwise set to 100%
+		var width = 0;
+		$('.' + plugin.propertyName + '-row', inst._mainDiv).find('button:last').each(function() {
+			width = Math.max(width, this.offsetLeft + this.offsetWidth +
+				parseInt($(this).css('margin-right'), 10));
+		});
+		inst._mainDiv.css('width', width);
 		// reposition calculator panel horizontally if outside the browser window
 		if (inst.options.isRTL ||
 				(offset.left + inst._mainDiv.outerWidth() - scrollX) > browserWidth) {
 			offset.left = Math.max((isFixed ? 0 : scrollX),
 				pos[0] + (inst._input ? inst._input.outerWidth() : 0) -
-				(isFixed ? scrollX : 0) - inst._mainDiv.outerWidth() -
-				(isFixed && $.browser.opera ? document.documentElement.scrollLeft : 0));
+				(isFixed ? scrollX : 0) - inst._mainDiv.outerWidth());
 		}
 		else {
-			offset.left -= (isFixed ? scrollX : 0);
+			offset.left = Math.max((isFixed ? 0 : scrollX), offset.left - (isFixed ? scrollX : 0));
 		}
 		// reposition calculator panel vertically if outside the browser window
 		if ((offset.top + inst._mainDiv.outerHeight() - scrollY) > browserHeight) {
 			offset.top = Math.max((isFixed ? 0 : scrollY),
-				pos[1] - (isFixed ? scrollY : 0) - inst._mainDiv.outerHeight() -
-				(isFixed && $.browser.opera ? document.documentElement.scrollTop : 0));
+				pos[1] - (isFixed ? scrollY : 0) - inst._mainDiv.outerHeight());
 		}
 		else {
-			offset.top -= (isFixed ? scrollY : 0);
+			offset.top = Math.max((isFixed ? 0 : scrollY), offset.top - (isFixed ? scrollY : 0));
 		}
 		return offset;
 	},
@@ -691,7 +677,7 @@ $.extend(Calculator.prototype, {
 			else {
 				inst._mainDiv[(inst.options.showAnim == 'slideDown' ? 'slideUp' :
 					(inst.options.showAnim == 'fadeIn' ? 'fadeOut' : 'hide'))](
-						inst.options.showAnim ? duration : '');
+						inst.options.showAnim ? duration : null);
 			}
 		}
 		if ($.isFunction(inst.options.onClose)) {
@@ -752,7 +738,7 @@ $.extend(Calculator.prototype, {
 			else {
 				var code = plugin._keyCodes[e.keyCode];
 				if (code) {
-					$('button[keystroke="' + code + '"]', inst._mainDiv).not(':disabled').click();
+					$('button[data-keystroke="' + code + '"]', inst._mainDiv).not(':disabled').click();
 					handled = true;
 				}
 			}
@@ -798,7 +784,7 @@ $.extend(Calculator.prototype, {
 				(div && !plugin._isDisabledPlugin(div))) {
 			var code = plugin._keyChars[ch == inst.options.decimalChar ? '.' : ch];
 			if (code) {
-				$('button[keystroke="' + code + '"]', inst._mainDiv).not(':disabled').click();
+				$('button[data-keystroke="' + code + '"]', inst._mainDiv).not(':disabled').click();
 			}
 			return false;
 		}
@@ -848,7 +834,7 @@ $.extend(Calculator.prototype, {
 				var uiHighlight = (inst.options.useThemeRoller ? ' ui-state-highlight' : '');
 				html += (def[1] == this.space ? '<span class="' + this.propertyName + '-' + def[3] + '"></span>' :
 					(inst._inline && (def[2] == '._close' || def[2] == '._erase') ? '' :
-					'<button type="button" keystroke="' + code + '"' +
+					'<button type="button" data-keystroke="' + code + '"' +
 					// Control buttons
 					(def[1] == this.control ? ' class="' + this._ctrlClass +
 					(def[0].match(/^#base/) ? (def[0].replace(/^#base/, '') == inst.options.base ?
@@ -881,9 +867,7 @@ $.extend(Calculator.prototype, {
 			}
 			html += '</div>';
 		}
-		html += '<div style="clear: both;"></div>' + 
-			(!inst._inline && $.browser.msie && parseInt($.browser.version, 10) < 7 ? // IE6- only
-			'<iframe src="javascript:false;" class="' + this._coverClass + '"></iframe>' : '');
+		html += '<div style="clear: both;"></div>';
 		html = $(html);
 		html.find('button').bind('mouseover.' + this.propertyName, function() {
 				plugin._saveClasses = this.className;
@@ -933,7 +917,7 @@ $.extend(Calculator.prototype, {
 	   @param  inst    (object) the current instance settings
 	   @param  button  (jQuery) the button pressed */
 	_handleButton: function(inst, button) {
-		var keyDef = this._keyDefs[button.attr('keystroke')];
+		var keyDef = this._keyDefs[button.data('keystroke')];
 		if (!keyDef) {
 			return;
 		}

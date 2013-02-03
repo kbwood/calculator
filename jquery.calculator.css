@@ -1,4 +1,4 @@
-/* Main style sheet for jQuery Calculator v1.4.0 */
+/* Main style sheet for jQuery Calculator v1.4.1 */
 div.hasCalculator, span.hasCalculator {
 	position: relative;
 }
@@ -16,9 +16,9 @@ img.calculator-trigger {
 	margin: 0;
 	padding: 0;
 	border: 1px solid #888;
-	border-radius: 4px;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
+	border-radius: 4px;
 	color: #000;
 	background-color: #f4f4f4;
 	font-family: Arial,Helvetica,sans-serif;
@@ -32,9 +32,9 @@ img.calculator-trigger {
 .calculator-inline {
 	position: relative;
 	border: 1px solid #888;
-	border-radius: 4px;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
+	border-radius: 4px;
 	background-color: #f4f4f4;
 }
 .calculator-inline .calculator-close {
@@ -64,9 +64,9 @@ img.calculator-trigger {
 	text-align: right;
 	background-color: #fff;
 	border: 1px inset #000;
-	border-radius: 4px;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
+	border-radius: 4px;
 	font-size: 110%;
 }
 .calculator-focussed {
@@ -93,9 +93,9 @@ img.calculator-trigger {
 	padding: 0px;
 	height: 22px;
 	background-color: #f4f4f4;
-	border-radius: 4px;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
+	border-radius: 4px;
 	text-align: center;
 	cursor: pointer;
 }
@@ -130,35 +130,25 @@ img.calculator-trigger {
 .calculator-key-down {
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
+	border-radius: 4px;
 }
 .calculator-keystroke {
 	display: none;
 	width: 16px;
 	height: 14px;
 	position: absolute;
-	left: -8px;
-	top: -8px;
+	left: -1px;
+	top: -1px;
 	color: #000;
 	background-color: #fff;
 	border: 1px solid #888;
 	font-size: 80%;
 }
 .calculator-angle .calculator-keystroke, .calculator-base .calculator-keystroke, .calculator-trig .calculator-keystroke {
-	top: -10px;
+	top: -2px;
 	font-size: 95%;
 }
 .calculator-keyname {
 	width: 22px;
 	font-size: 70%;
-}
-.calculator-cover {
-	display: none;
-	display/**/: block;
-	position: absolute;
-	z-index: -1;
-	filter: mask();
-	top: -4px;
-	left: -4px;
-	width: 125px;
-	height: 200px;
 }
