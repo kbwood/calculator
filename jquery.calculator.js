@@ -62,7 +62,7 @@ function Calculator() {
 		'MR': ['#memRecall', this.unary, this._memRecall, 'memory mem-recall', 'MEM_RECALL', 'r'],
 		'MS': ['#memStore', this.unary, this._memStore, 'memory mem-store', 'MEM_STORE', 'm'],
 		'M+': ['#memAdd', this.unary, this._memAdd, 'memory mem-add', 'MEM_ADD', '>'],
-		'M-': ['#memSubtract', this.unary, this._memSubtract, 'memory mem-subtract', 'MEM_SUBTRACT', '<'],
+		'M-': ['#memSubtract', this.unary, this._memSubtract, 'memory mem-subtract', 'MEM_SUBTRACT', '>'],
 		'BB': ['#base2', this.control, this._base2, 'base base2', 'BASE_2', 'B'],
 		'BO': ['#base8', this.control, this._base8, 'base base8', 'BASE_8', 'C'],
 		'BD': ['#base10', this.control, this._base10, 'base base10', 'BASE_10', 'D'],
