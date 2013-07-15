@@ -1,8 +1,7 @@
-﻿/* http://keith-wood.name/calculator.html
-   Calculator field entry extension for jQuery v1.4.0.
+/* http://keith-wood.name/calculator.html
+   Calculator field entry extension for jQuery v1.4.1.
    Written by Keith Wood (kbwood{at}iinet.com.au) October 2008.
-   Dual licensed under the GPL (http://dev.jquery.com/browser/trunk/jquery/GPL-LICENSE.txt) and 
-   MIT (http://dev.jquery.com/browser/trunk/jquery/MIT-LICENSE.txt) licenses. 
+   Licensed under the MIT (https://github.com/jquery/jquery/blob/master/MIT-LICENSE.txt) licence. 
    Please attribute the author if you use it. */
    
 (function($) { // hide the namespace
@@ -48,9 +47,9 @@ function Calculator() {
 		'1X': ['1/x', this.unary, this._inverse, 'fn inverse', 'INV', 'i'],
 		'LG': ['log', this.unary, this._log, 'fn log', 'LOG', 'l'],
 		'LN': ['ln', this.unary, this._ln, 'fn ln', 'LN', 'n'],
-		'EX': ['eⁿ', this.unary, this._exp, 'fn exp', 'EXP', 'E'],
+		'EX': ['en', this.unary, this._exp, 'fn exp', 'EXP', 'E'],
 		'SQ': ['x²', this.unary, this._sqr, 'fn sqr', 'SQR', '@'],
-		'SR': ['√', this.unary, this._sqrt, 'fn sqrt', 'SQRT', '!'],
+		'SR': ['v', this.unary, this._sqrt, 'fn sqrt', 'SQRT', '!'],
 		'XY': ['x^y', this.binary, this._power, 'fn power', 'POWER', '^'],
 		'RN': ['rnd', this.unary, this._random, 'random', 'RANDOM', '?'],
 		'SN': ['sin', this.unary, this._sin, 'trig sin', 'SIN', 's'],
@@ -97,44 +96,44 @@ function Calculator() {
 	}
 	this.regional = []; // Available regional settings, indexed by language code
 	this.regional[''] = { // Default regional settings
-		decimalChar: '.', // Character for the decimal point
+		decimalChar: _SWEgetMessage("IDS_SWE_JQGRID_DECIMAL_SEPARATOR"), // Character for the decimal point
 		buttonText: '...', // Display text for trigger button
-		buttonStatus: 'Open the calculator', // Status text for trigger button
-		closeText: 'Close', // Display text for close link
-		closeStatus: 'Close the calculator', // Status text for close link
-		useText: 'Use', // Display text for use link
-		useStatus: 'Use the current value', // Status text for use link
-		eraseText: 'Erase', // Display text for erase link
-		eraseStatus: 'Erase the value from the field', // Status text for erase link
-		backspaceText: 'BS', // Display text for backspace link
-		backspaceStatus: 'Erase the last digit', // Status text for backspace link
-		clearErrorText: 'CE', // Display text for clear error link
-		clearErrorStatus: 'Erase the last number', // Status text for clear error link
-		clearText: 'CA', // Display text for clear link
-		clearStatus: 'Reset the calculator', // Status text for clear link
-		memClearText: 'MC', // Display text for memory clear link
-		memClearStatus: 'Clear the memory', // Status text for memory clear link
-		memRecallText: 'MR', // Display text for memory recall link
-		memRecallStatus: 'Recall the value from memory', // Status text for memory recall link
-		memStoreText: 'MS', // Display text for memory store link
-		memStoreStatus: 'Store the value in memory', // Status text for memory store link
-		memAddText: 'M+', // Display text for memory add link
-		memAddStatus: 'Add to memory', // Status text for memory add link
-		memSubtractText: 'M-', // Display text for memory subtract link
-		memSubtractStatus: 'Subtract from memory', // Status text for memory subtract link
-		base2Text: 'Bin', // Display text for base 2 link
-		base2Status: 'Switch to binary', // Status text for base 2 link
-		base8Text: 'Oct', // Display text for base 8 link
-		base8Status: 'Switch to octal', // Status text for base 8 link
-		base10Text: 'Dec', // Display text for base 10 link
-		base10Status: 'Switch to decimal', // Status text for base 10 link
-		base16Text: 'Hex', // Display text for base 16 link
-		base16Status: 'Switch to hexadecimal', // Status text for base 16 link
-		degreesText: 'Deg', // Display text for degrees link
-		degreesStatus: 'Switch to degrees', // Status text for degrees link
-		radiansText: 'Rad', // Display text for radians link
-		radiansStatus: 'Switch to radians', // Status text for radians link
-		popupTitle : 'Calculator Popup',
+		buttonStatus: _SWEgetMessage("IDS_SWE_CALCULATOR_BUTTON_STATUS"), // Status text for trigger button
+		closeText: _SWEgetMessage("IDS_SWE_CALCULATOR_CLOSE_TEXT"), // Display text for close link
+		closeStatus: _SWEgetMessage("IDS_SWE_CALCULATOR_CLOSE_STATUS"), // Status text for close link
+		useText: _SWEgetMessage("IDS_SWE_CALCULATOR_USE_TEXT"), // Display text for use link
+		useStatus: _SWEgetMessage("IDS_SWE_CALCULATOR_USE_STATUS"), // Status text for use link
+		eraseText:  _SWEgetMessage("IDS_SWE_CALCULATOR_ERASE_TEXT"), // Display text for erase link
+		eraseStatus: _SWEgetMessage("IDS_SWE_CALCULATOR_ERASE_STATUS"), // Status text for erase link
+		backspaceText: _SWEgetMessage("IDS_SWE_CALCULATOR_BACKSPACE_TEXT"), // Display text for backspace link
+		backspaceStatus: _SWEgetMessage("IDS_SWE_CALCULATOR_BACKSPACE_STATUS"), // Status text for backspace link
+		clearErrorText: _SWEgetMessage("IDS_SWE_CALCULATOR_CLEAR_ERROR_TEXT"), // Display text for clear error link
+		clearErrorStatus: _SWEgetMessage("IDS_SWE_CALCULATOR_CLEAR_ERROR_STATUS"), // Status text for clear error link
+		clearText: _SWEgetMessage("IDS_SWE_CALCULATOR_CLEAR_TEXT"), // Display text for clear link
+		clearStatus: _SWEgetMessage("IDS_SWE_CALCULATOR_CLEAR_STATUS"), // Status text for clear link
+		memClearText: _SWEgetMessage("IDS_SWE_CALCULATOR_MEM_CLEAR_TEXT"), // Display text for memory clear link
+		memClearStatus:  _SWEgetMessage("IDS_SWE_CALCULATOR_MEM_CLEAR_STATUS"), // Status text for memory clear link
+		memRecallText: _SWEgetMessage("IDS_SWE_CALCULATOR_MEM_RECALL_TEXT"), // Display text for memory recall link
+		memRecallStatus: _SWEgetMessage("IDS_SWE_CALCULATOR_MEM_RECALL_STATUS"), // Status text for memory recall link
+		memStoreText: _SWEgetMessage("IDS_SWE_CALCULATOR_MEM_STORE_TEXT"), // Display text for memory store link
+		memStoreStatus: _SWEgetMessage("IDS_SWE_CALCULATOR_MEM_STORE_STATUS"), // Status text for memory store link
+		memAddText: _SWEgetMessage("IDS_SWE_CALCULATOR_MEM_ADD_TEXT"), // Display text for memory add link
+		memAddStatus: _SWEgetMessage("IDS_SWE_CALCULATOR_MEM_ADD_STATUS"), // Status text for memory add link
+		memSubtractText: _SWEgetMessage("IDS_SWE_CALCULATOR_MEM_SUBTRACT_TEXT"), // Display text for memory subtract link
+		memSubtractStatus: _SWEgetMessage("IDS_SWE_CALCULATOR_MEM_SUBTRACT_STATUS"), // Status text for memory subtract link
+		base2Text: _SWEgetMessage("IDS_SWE_CALCULATOR_BASE2_TEXT"), // Display text for base 2 link
+		base2Status: _SWEgetMessage("IDS_SWE_CALCULATOR_BASE2_STATUS"), // Status text for base 2 link
+		base8Text: _SWEgetMessage("IDS_SWE_CALCULATOR_BASE8_TEXT"), // Display text for base 8 link
+		base8Status: _SWEgetMessage("IDS_SWE_CALCULATOR_BASE8_STATUS"), // Status text for base 8 link
+		base10Text:  _SWEgetMessage("IDS_SWE_CALCULATOR_BASE10_TEXT"), // Display text for base 10 link
+		base10Status: _SWEgetMessage("IDS_SWE_CALCULATOR_BASE10_STATUS"), // Status text for base 10 link
+		base16Text: _SWEgetMessage("IDS_SWE_CALCULATOR_BASE16_TEXT"), // Display text for base 16 link
+		base16Status: _SWEgetMessage("IDS_SWE_CALCULATOR_BASE16_STATUS"), // Status text for base 16 link
+		degreesText: _SWEgetMessage("IDS_SWE_CALCULATOR_DEGREES_TEXT"), // Display text for degrees link
+		degreesStatus: _SWEgetMessage("IDS_SWE_CALCULATOR_DEGREES_STATUS"), // Status text for degrees link
+		radiansText: _SWEgetMessage("IDS_SWE_CALCULATOR_RADIANS_TEXT"), // Display text for radians link
+		radiansStatus: _SWEgetMessage("IDS_SWE_CALCULATOR_RADIANS_STATUS"), // Status text for radians link
+		popupTitle : 'Calculator Popup', // Internationalization Pending            // Popup Title        
 		isRTL: false // True if right-to-left language, false if left-to-right
 	};
 	this._defaults = { // Global defaults for all the calculator instances
@@ -192,7 +191,6 @@ $.extend(Calculator.prototype, {
 	_resultClass: 'calculator-result', // The name of the calculator result marker class
 	_focussedClass: 'calculator-focussed', // The name of the focussed marker class
 	_keystrokeClass: 'calculator-keystroke', // The name of the keystroke marker class
-	_coverClass: 'calculator-cover', // The name of the IE select cover marker class
 	_rtlClass: 'calculator-rtl', // The name of the right-to-left marker class
 	_rowClass: 'calculator-row', // The name of the row marker class
 	_ctrlClass: 'calculator-ctrl', // The name of the control key marker class
@@ -261,7 +259,7 @@ $.extend(Calculator.prototype, {
 		var keyEntry = (!inline ? $target :
 			$('<input type="text" class="' + this._inlineEntryClass + '"/>'));
 		var inst = {options: $.extend({}, this._defaults, options),
-			_input: keyEntry, _inline: inline, memory: 0,
+			_target: $target, _input: keyEntry, _inline: inline, memory: 0,
 			_mainDiv: (inline ? $('<div class="' + this._inlineClass + '"></div>') : this.mainDiv)};
 		if (inst.options.memoryAsCookie) {
 			var memory = this._getMemoryCookie(inst);
@@ -320,17 +318,21 @@ $.extend(Calculator.prototype, {
 				});
 			}
 		}
-		if (!inst._inline) {
-          		inst._mainDiv.bind('keydown.' + plugin.propertyName, this._doKeyDown).
-				bind('keyup.' + plugin.propertyName, this._doKeyUp).
-				bind('keypress.' + plugin.propertyName, this._doKeyPress);
-        	};
-		
-		if (inst._inline) {
-			inst._input.bind('keydown.' + plugin.propertyName, this._doKeyDown).
+		//kppatel :: Accessibility-keydown bind to MainDiv of the Calcualtor Popup
+		/*inst._input.bind('keydown.' + plugin.propertyName, this._doKeyDown).
 			bind('keyup.' + plugin.propertyName, this._doKeyUp).
-			bind('keypress.' + plugin.propertyName, this._doKeyPress);
-			
+			bind('keypress.' + plugin.propertyName, this._doKeyPress);*/
+
+		if (!inst._inline){
+		    inst._mainDiv
+				.bind('keydown.' + plugin.propertyName, this._doKeyDown)
+				.bind('keyup.' + plugin.propertyName, this._doKeyUp)
+				.bind('keypress.' + plugin.propertyName, this._doKeyPress);
+		}
+		if (inst._inline) {
+			inst._input.bind('keydown.' + plugin.propertyName, this._doKeyDown)
+					   .bind('keyup.' + plugin.propertyName, this._doKeyUp)
+					   .bind('keypress.' + plugin.propertyName, this._doKeyPress);
 			inst._mainDiv.bind('keydown.' + plugin.propertyName, this._doKeyDown).
 				bind('keyup.' + plugin.propertyName, this._doKeyUp).
 				bind('keypress.' + plugin.propertyName, this._doKeyPress);
@@ -400,8 +402,13 @@ $.extend(Calculator.prototype, {
 			return;
 		}
 		var inst = target.data(this.propertyName);
-		inst._mainDiv.unbind('.' + plugin.propertyName);
+		if ( !inst )
+		inst = plugin._curInst; //kppatel
+		
 		inst._input.unbind('.' + plugin.propertyName).
+			removeData(this.propertyName);
+		//kppatel ::Accessibility - keydown unbind on MainDiv of the Calcualtor Popup
+		inst._mainDiv.unbind('.' + plugin.propertyName).
 			removeData(this.propertyName);
 		target.removeClass(this.markerClassName).empty().
 			unbind('.' + plugin.propertyName).
@@ -409,6 +416,7 @@ $.extend(Calculator.prototype, {
 			siblings('.' + this._appendClass).remove().end().
 			siblings('.' + this._triggerClass).remove().end().
 			prev('.' + this._inlineEntryClass).remove();
+			
 	},
 
 	/* Enable the calculator for a jQuery selection.
@@ -427,7 +435,7 @@ $.extend(Calculator.prototype, {
 				css({opacity: '1.0', cursor: ''});
 		}
 		else if (nodeName == 'div' || nodeName == 'span') {
-			control.find('.' + this._inlineEntryClass + ',button').removeAttr('disabled').end().
+			control.find('.' + this._inlineEntryClass + ',button').prop('disabled', false).end().
 				children('.' + this._disableClass).remove();
 		}
 		this._disabledFields = $.map(this._disabledFields,
@@ -459,11 +467,13 @@ $.extend(Calculator.prototype, {
 					return false;
 				}
 			});
-			control.find('.' + this._inlineEntryClass + ',button').attr('disabled', 'disabled').end().
-				prepend('<div class="' + this._disableClass + '" style="width: ' +
-				inline.outerWidth() + 'px; height: ' + inline.outerHeight() +
-				'px; left: ' + (offset.left - relOffset.left) +
-				'px; top: ' + (offset.top - relOffset.top) + 'px;"></div>');
+			control.find('.' + this._inlineEntryClass + ',button').prop('disabled', true);
+			if (control.find('.' + this._disableClass).length == 0) {
+				control.prepend('<div class="' + this._disableClass + '" style="width: ' +
+					inline.outerWidth() + 'px; height: ' + inline.outerHeight() +
+					'px; left: ' + (offset.left - relOffset.left) +
+					'px; top: ' + (offset.top - relOffset.top) + 'px;"></div>');
+			}
 		}
 		this._disabledFields = $.map(this._disabledFields,
 			function(value) { return (value == target ? null : value); }); // delete entry
@@ -496,15 +506,10 @@ $.extend(Calculator.prototype, {
 			isFixed |= $(this).css('position') == 'fixed';
 			return !isFixed;
 		});
-		if (isFixed && $.browser.opera) { // correction for Opera when fixed and scrolled
-			plugin._pos[0] -= document.documentElement.scrollLeft;
-			plugin._pos[1] -= document.documentElement.scrollTop;
-		}
 		var offset = {left: plugin._pos[0], top: plugin._pos[1]};
 		plugin._pos = null;
 		// determine sizing offscreen
-		inst._mainDiv.css({position: 'absolute', display: 'block', top: '-1000px',
-			width: ($.browser.opera ? '1000px' : 'auto')});
+		inst._mainDiv.css({position: 'absolute', display: 'block', top: '-1000px', width: 'auto'});
 		// callback before calculator opening		
 		if ($.isFunction(inst.options.onOpen)) {
 			inst.options.onOpen.apply((inst._input ? inst._input[0] : null),  // trigger custom callback
@@ -520,10 +525,6 @@ $.extend(Calculator.prototype, {
 		duration = (duration == 'normal' && $.ui && $.ui.version >= '1.8' ? '_default' : duration);
 		var postProcess = function() {
 			plugin._showingCalculator = true;
-			var borders = plugin._getBorders(inst._mainDiv);
-			inst._mainDiv.find('iframe.' + plugin._coverClass). // IE6- only
-				css({left: -borders[0], top: -borders[1],
-					width: inst._mainDiv.outerWidth(), height: inst._mainDiv.outerHeight()});
 		};
 		if ($.effects && $.effects[inst.options.showAnim]) {
 			var data = inst._mainDiv.data(); // Update old effects data
@@ -537,17 +538,26 @@ $.extend(Calculator.prototype, {
 		}
 		else {
 			inst._mainDiv[inst.options.showAnim || 'show'](
-				(inst.options.showAnim ? duration : ''), postProcess);
+				(inst.options.showAnim ? duration : null), postProcess);
 		}
 		if (!inst.options.showAnim) {
 			postProcess();
 		}
-		inst._mainDiv.attr("aria-label",inst.options.popupTitle)
-		        .attr("role","application")
-                	.attr("aria-atomic","true")
-		        .attr("aria-live","assertive" )
-		        .attr("aria-relevant","all" )
-		        .attr("tabindex","0").focus();
+		//kppatel ::Accessibility - Focus to be retained on the Calcualtor Popup Div
+		/*if (inst._input[0].type != 'hidden') {
+			inst._input[0].focus();
+		}*/
+		 
+                              inst._mainDiv.attr("aria-label", inst.options.popupTitle )
+            .attr("role","application")
+            .attr("aria-atomic","true")
+            .attr("aria-live","assertive" )
+            .attr("aria-relevant","all" )
+           .attr("tabindex","0").focus();
+            
+          
+		
+		
 		plugin._curInst = inst;
 	},
 
@@ -607,14 +617,18 @@ $.extend(Calculator.prototype, {
 	   @param  inst  (object) the instance settings */
 	_updateCalculator: function(inst) {
 		var borders = this._getBorders(inst._mainDiv);
-		inst._mainDiv.html(this._generateHTML(inst)).
-			find('iframe.' + this._coverClass). // IE6- only
-			css({left: -borders[0], top: -borders[1],
-				width: inst._mainDiv.outerWidth(), height: inst._mainDiv.outerHeight()});
-		inst._mainDiv.removeClass().addClass(inst.options.calculatorClass +
-			(inst.options.useThemeRoller ? ' ui-widget ui-widget-content' : '') +
-			(inst.options.isRTL ? ' ' + plugin._rtlClass : '') + ' ' +
-			(inst._inline ? this._inlineClass : this._mainDivClass));
+		inst._mainDiv.html(this._generateHTML(inst)).removeClass().
+			addClass(inst.options.calculatorClass +
+				(inst.options.useThemeRoller ? ' ui-widget ui-widget-content' : '') +
+				(inst.options.isRTL ? ' ' + plugin._rtlClass : '') + ' ' +
+				(inst._inline ? this._inlineClass : this._mainDivClass));
+		if (this._isDisabledPlugin(inst._target[0])) {
+			this._disablePlugin(inst._target[0]);
+		}
+		//kppatel ::Accessibility - Focus to be retained on the Calcualtor Popup Div
+		/*if (this._curInst == inst) {
+			inst._input.focus();
+		}*/
 	},
 
 	/* Retrieve the size of left and top borders for an element.
@@ -622,8 +636,7 @@ $.extend(Calculator.prototype, {
 	   @return  (number[2]) the left and top borders */
 	_getBorders: function(elem) {
 		var convert = function(value) {
-			var extra = ($.browser.msie ? 1 : 0);
-			return {thin: 1 + extra, medium: 3 + extra, thick: 5 + extra}[value] || value;
+			return {thin: 1, medium: 3, thick: 5}[value] || value;
 		};
 		return [parseFloat(convert(elem.css('border-left-width'))),
 			parseFloat(convert(elem.css('border-top-width')))];
@@ -640,34 +653,30 @@ $.extend(Calculator.prototype, {
 		var browserHeight = window.innerHeight || document.documentElement.clientHeight;
 		var scrollX = document.documentElement.scrollLeft || document.body.scrollLeft;
 		var scrollY = document.documentElement.scrollTop || document.body.scrollTop;
-		if (($.browser.msie && parseInt($.browser.version, 10) < 7) || $.browser.opera) {
-			// recalculate width as otherwise set to 100%
-			var width = 0;
-			$('.' + plugin.propertyName + '-row', inst._mainDiv).find('button:last').each(function() {
-				width = Math.max(width, this.offsetLeft + this.offsetWidth +
-					parseInt($(this).css('margin-right'), 10));
-			});
-			inst._mainDiv.css('width', width);
-		}
+		// recalculate width as otherwise set to 100%
+		var width = 0;
+		$('.' + plugin.propertyName + '-row', inst._mainDiv).find('button:last').each(function() {
+			width = Math.max(width, this.offsetLeft + this.offsetWidth +
+				parseInt($(this).css('margin-right'), 10));
+		});
+		inst._mainDiv.css('width', width);
 		// reposition calculator panel horizontally if outside the browser window
 		if (inst.options.isRTL ||
 				(offset.left + inst._mainDiv.outerWidth() - scrollX) > browserWidth) {
 			offset.left = Math.max((isFixed ? 0 : scrollX),
 				pos[0] + (inst._input ? inst._input.outerWidth() : 0) -
-				(isFixed ? scrollX : 0) - inst._mainDiv.outerWidth() -
-				(isFixed && $.browser.opera ? document.documentElement.scrollLeft : 0));
+				(isFixed ? scrollX : 0) - inst._mainDiv.outerWidth());
 		}
 		else {
-			offset.left -= (isFixed ? scrollX : 0);
+			offset.left = Math.max((isFixed ? 0 : scrollX), offset.left - (isFixed ? scrollX : 0));
 		}
 		// reposition calculator panel vertically if outside the browser window
 		if ((offset.top + inst._mainDiv.outerHeight() - scrollY) > browserHeight) {
 			offset.top = Math.max((isFixed ? 0 : scrollY),
-				pos[1] - (isFixed ? scrollY : 0) - inst._mainDiv.outerHeight() -
-				(isFixed && $.browser.opera ? document.documentElement.scrollTop : 0));
+				pos[1] - (isFixed ? scrollY : 0) - inst._mainDiv.outerHeight());
 		}
 		else {
-			offset.top -= (isFixed ? scrollY : 0);
+			offset.top = Math.max((isFixed ? 0 : scrollY), offset.top - (isFixed ? scrollY : 0));
 		}
 		return offset;
 	},
@@ -700,7 +709,7 @@ $.extend(Calculator.prototype, {
 			else {
 				inst._mainDiv[(inst.options.showAnim == 'slideDown' ? 'slideUp' :
 					(inst.options.showAnim == 'fadeIn' ? 'fadeOut' : 'hide'))](
-						inst.options.showAnim ? duration : '');
+						inst.options.showAnim ? duration : null);
 			}
 		}
 		if ($.isFunction(inst.options.onClose)) {
@@ -731,17 +740,17 @@ $.extend(Calculator.prototype, {
 
 	/* Focus back onto the input field. */
 	_focusEntry: function() {
-		// not required as we will have the focus on DIV always so that it is Accessibile
+		//kppatel ::Accessibility - Focus to be retained on the Calcualtor Popup Div
+		/*if (plugin._curInst && plugin._curInst._input) {
+			plugin._curInst._input.focus();
+		}*/
 	},
 
 	/* Handle keystrokes.
 	   @param  e  (event) the key event */
 	_doKeyDown: function(e) {
 		var handled = false;
-		var inst = $.data(e.target, plugin.propertyName);
-		if (!inst){
-		    inst = plugin._curInst;
-		}
+		var inst = plugin._curInst; //kppatel
 		var div = (inst && inst._inline ? $(e.target).parent()[0] : null);
 		if (e.keyCode == 9) { // tab
 			plugin.mainDiv.stop(true, true);
@@ -762,7 +771,7 @@ $.extend(Calculator.prototype, {
 			else {
 				var code = plugin._keyCodes[e.keyCode];
 				if (code) {
-					$('button[keystroke="' + code + '"]', inst._mainDiv).not(':disabled').click();
+					$('button[data-keystroke="' + code + '"]', inst._mainDiv).not(':disabled').click();
 					handled = true;
 				}
 			}
@@ -781,7 +790,7 @@ $.extend(Calculator.prototype, {
 	   @param  e  (event) the key event */
 	_doKeyUp: function(e) {
 		if (plugin._showingKeystrokes) {
-			var inst = $.data(e.target, plugin.propertyName);
+			var inst = plugin._curInst; //kkppatel
 			inst._mainDiv.find('.' + plugin._keystrokeClass).hide();
 			plugin._showingKeystrokes = false;
 		}
@@ -791,10 +800,12 @@ $.extend(Calculator.prototype, {
 	   @param  e  (event) the key event
 	   @return  true if keystroke allowed, false if not */
 	_doKeyPress: function(e) {
+		//kppatel ::Accessibility - inst got from curInst
 		var inst = $.data(e.target, plugin.propertyName);
-		if ( !inst ){
-		    inst = plugin._curInst;
-		}
+		if (!inst){
+	      inst = plugin._curInst;
+      }
+		
 		if (!inst) {
 			return true;
 		}
@@ -811,7 +822,7 @@ $.extend(Calculator.prototype, {
 				(div && !plugin._isDisabledPlugin(div))) {
 			var code = plugin._keyChars[ch == inst.options.decimalChar ? '.' : ch];
 			if (code) {
-				$('button[keystroke="' + code + '"]', inst._mainDiv).not(':disabled').click();
+				$('button[data-keystroke="' + code + '"]', inst._mainDiv).not(':disabled').click();
 			}
 			return false;
 		}
@@ -861,7 +872,7 @@ $.extend(Calculator.prototype, {
 				var uiHighlight = (inst.options.useThemeRoller ? ' ui-state-highlight' : '');
 				html += (def[1] == this.space ? '<span class="' + this.propertyName + '-' + def[3] + '"></span>' :
 					(inst._inline && (def[2] == '._close' || def[2] == '._erase') ? '' :
-					'<button type="button" keystroke="' + code + '"' +
+					'<button type="button" data-keystroke="' + code + '"' +
 					// Control buttons
 					(def[1] == this.control ? ' class="' + this._ctrlClass +
 					(def[0].match(/^#base/) ? (def[0].replace(/^#base/, '') == inst.options.base ?
@@ -894,9 +905,7 @@ $.extend(Calculator.prototype, {
 			}
 			html += '</div>';
 		}
-		html += '<div style="clear: both;"></div>' + 
-			(!inst._inline && $.browser.msie && parseInt($.browser.version, 10) < 7 ? // IE6- only
-			'<iframe src="javascript:false;" class="' + this._coverClass + '"></iframe>' : '');
+		html += '<div style="clear: both;"></div>';
 		html = $(html);
 		html.find('button').bind('mouseover.' + this.propertyName, function() {
 				plugin._saveClasses = this.className;
@@ -946,7 +955,7 @@ $.extend(Calculator.prototype, {
 	   @param  inst    (object) the current instance settings
 	   @param  button  (jQuery) the button pressed */
 	_handleButton: function(inst, button) {
-		var keyDef = this._keyDefs[button.attr('keystroke')];
+		var keyDef = this._keyDefs[button.data('keystroke')];
 		if (!keyDef) {
 			return;
 		}
@@ -962,6 +971,10 @@ $.extend(Calculator.prototype, {
 			case this.unary:
 				this._unaryOp(inst, keyDef[2], label); break;
 		}
+		//kppatel ::Accessibility - Focus to be retained on the Calcualtor Popup Div
+		/*if (plugin._showingCalculator || inst._inline) {
+			inst._input.focus();
+		}*/
 	},
 
 	/* Do nothing. */
