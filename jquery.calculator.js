@@ -725,6 +725,10 @@ $.extend(Calculator.prototype, {
 			if (inst && inst._inline) {
 				inst._input.blur();
 			}
+			else{
+			    inst._input.focus();
+			    handled = true;
+			}
 		}
 		else if (plugin._showingCalculator ||
 				(div && !plugin._isDisabledPlugin(div))) {
