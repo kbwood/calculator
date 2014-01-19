@@ -1,7 +1,7 @@
 {
 	"name": "kbw.calculator",
 	"title": "jQuery Calculator",
-	"description": "Attaches a popup calendar to your input fields or shows an inline calendar for selecting individual dates or date ranges. * Select one date, multiple individual dates, or a range of dates. * Keyboard support. * Standard layout, or design your own. * Restrict dates to a range or exclude individual dates. * Add your own commands. * Use one of the provided themes, or any of the standard Themeroller themes. * Over 70 localisations.",
+	"description": "This plugin attaches a popup calculator to an input field. * Simple or scientific calculators. * Define your own keys. * Over 15 localisations.",
 	"keywords": [
 		"calculate",
 		"calculator",
@@ -10,7 +10,7 @@
 		"input",
 		"ui"
 	],
-	"version": "1.4.1",
+	"version": "2.0.0",
 	"author": {
 		"name": "Keith Wood",
 		"url": "http://keith-wood.name/"
@@ -33,6 +33,6 @@
 	"docs": "http://keith-wood.name/calculatorRef.html",
 	"download": "http://keith-wood.name/calculator.html",
 	"dependencies": {
-		"jquery": ">=1.5"
+		"jquery": ">=1.7"
 	}
 }
