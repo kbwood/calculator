@@ -1,4 +1,4 @@
-/* Alternative (native) style sheet for jQuery Calculator v2.0.0 */
+/* Alternative (native) style sheet for jQuery Calculator v2.0.1 */
 div.is-calculator, span.is-calculator {
 	position: relative;
 }
@@ -68,6 +68,13 @@ img.calculator-trigger {
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
 	font-size: 110%;
+}
+.calculator-result span {
+	display: inline-block;
+	width: 100%;
+}
+.calculator-result .calculator-formula {
+	font-size: 60%;
 }
 .calculator-focussed {
 	background-color: #ffc;
