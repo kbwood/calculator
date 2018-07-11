@@ -97,6 +97,7 @@
 			@property [cookiePath=''] {string} The path for the memory cookie.
 			@property [useDegrees=false] {boolean} <code>true</code> to use degress for trigonometric functions, <code>false</code> for radians.
 			@property [constrainInput=true] {boolean} <code>true</code> to restrict typed characters to numerics, <code>false</code> to allow anything.
+			@property [onUse=null] {useCallback} Define a callback function when the Use button is pressed to use the value.
 			@property [onOpen=null] {openCallback} Define a callback function before the panel is opened.
 			@property [onButton=null] {buttonCallback} Define a callback function when a button is activated.
 			@property [onClose=null] {closeCallback} Define a callback function when the panel is closed. */
@@ -123,6 +124,7 @@
 			cookiePath: '',
 			useDegrees: false,
 			constrainInput: true,
+			onUse: null,
 			onOpen: null,
 			onButton: null,
 			onClose: null
@@ -356,9 +358,15 @@
 					var trigger = $(inst.options.buttonImageOnly ? 
 						$('<img/>').attr({src: inst.options.buttonImage,
 							alt: inst.options.buttonStatus, title: inst.options.buttonStatus}) :
+						inst.options.useThemeRoller ? 
+							$('<button type="button" title="' + inst.options.buttonStatus + '" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only"></button>').
+							html('<span class="ui-button-icon-left ui-icon ui-icon-calculator"/><span class="ui-button-text">ui-button</span>')
+						:
 						$('<button type="button" title="' + inst.options.buttonStatus + '"></button>').
 							html(inst.options.buttonImage === '' ? inst.options.buttonText :
-							$('<img/>').attr({src: inst.options.buttonImage})));
+							$('<img/>').attr({src: inst.options.buttonImage}))
+							
+					);
 					elem[inst.options.isRTL ? 'before' : 'after'](trigger);
 					trigger.addClass(this._triggerClass).on('click.' + inst.name, function() {
 						if (plugin._showingCalculator && plugin._lastInput === elem[0]) {
@@ -510,6 +518,7 @@
 				inst.options.onOpen.apply((inst._input ? inst._input[0] : null),  // trigger custom callback
 					[(inst._inline ? inst.curValue : inst._input.val()), inst]);
 			}
+			$(input).trigger('calculatoropen');
 			plugin._reset(inst, inst._input.val());
 			plugin._updateCalculator(inst);
 			// and adjust position before showing
@@ -707,6 +716,7 @@
 				this._lastInput = null;
 			}
 			this._curInst = null;
+			$(inst._input).trigger('calculatorclose');
 		},
 
 		/** Close calculator if clicked elsewhere.
@@ -717,8 +727,8 @@
 				return;
 			}
 			var target = $(event.target);
-			if (!target.parents().andSelf().hasClass(plugin._mainDivClass) && !target.hasClass(plugin._getMarker()) &&
-					!target.parents().andSelf().hasClass(plugin._triggerClass) && plugin._showingCalculator) {
+			if (!target.parents().addBack().hasClass(plugin._mainDivClass) && !target.hasClass(plugin._getMarker()) &&
+					!target.parents().addBack().hasClass(plugin._triggerClass) && plugin._showingCalculator) {
 				plugin.hide();
 			}
 		},
@@ -878,7 +888,7 @@
 						(def[0].match(/^#mem(Clear|Recall)$/) && !inst.memory ?
 						' ' + this._memEmptyClass : '')))) +
 						// Common
-						(inst.options.useThemeRoller ? ' ui-state-default' : '') +
+						(inst.options.useThemeRoller ? ' ui-button ui-widget ui-state-default ui-corner-all' : '') +
 						(styles ? ' ' + styles : '') + '" ' +
 						(status ? 'title="' + status + '"' : '') + '>' +
 						(code === '_.' ? inst.options.decimalChar : label) +
@@ -934,6 +944,7 @@
 				inst.options.onButton.apply((inst._input ? inst._input[0] : null),
 					[label, inst.dispValue, inst]);  // trigger custom callback
 			}
+			$(inst._input).trigger('calculatorbutton', [label, inst.dispValue]);
 		},
 
 		/** Handle a button press.
@@ -1284,7 +1295,15 @@
 			if (inst._pendingOp !== this._noOp) {
 				this._unaryOp(inst, this._equals, label);
 			}
-			this._finished(inst, label, inst.dispValue);
+			
+			if ($.isFunction(inst.options.onUse)) {
+				inst.options.onUse.apply((inst._input ? inst._input[0] : null),
+					[inst.dispValue, inst]);  // trigger custom callback
+				this._sendButton(inst, label);
+				this.hide(inst._input[0]);
+			} else {
+				this._finished(inst, label, inst.dispValue);
+			}
 		},
 
 		/** Erase the field and close the calculator.
@@ -1310,7 +1329,7 @@
 				inst._input.val(value);
 			}
 			this._sendButton(inst, label);
-				this.hide(inst._input[0]);
+			this.hide(inst._input[0]);
 		}
 	});
 
@@ -1393,4 +1412,3 @@
 	});
 
 })(jQuery);
- 
